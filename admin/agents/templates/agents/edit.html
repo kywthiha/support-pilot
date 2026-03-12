@@ -242,20 +242,36 @@ SupportPilot Admin{% endblock %} {% block content %}
         </div>
 
 
-        <!-- Camera Toggle -->
-        <div class="form-check form-switch">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            id="gen_use_camera"
-            role="switch"
-          />
-          <label class="form-check-label small" for="gen_use_camera">
-            <i class="bi bi-camera me-1"></i> Support Mobile Camera
-          </label>
-          <div class="form-text">
-            Enable if the agent will receive camera feed instead of screen
-            share.
+        <!-- Agent Capabilities -->
+        <div class="mb-3">
+          <label class="form-label small fw-medium">Include Capabilities</label>
+          <div class="card shadow-none border-secondary border-opacity-25">
+            <div class="list-group list-group-flush small">
+              <!-- Mobile Camera -->
+              <label class="list-group-item d-flex align-items-center py-2" style="cursor: pointer;">
+                <input class="form-check-input me-2 mt-0" type="checkbox" id="gen_use_camera">
+                <div>
+                  <div class="fw-medium"><i class="bi bi-camera me-1"></i>Mobile Camera</div>
+                  <div class="text-muted" style="font-size: 0.8rem;">Instruct agent to handle camera feed</div>
+                </div>
+              </label>
+              <!-- Google Search -->
+              <label class="list-group-item d-flex align-items-center py-2" style="cursor: pointer;">
+                <input class="form-check-input me-2 mt-0" type="checkbox" id="gen_use_search">
+                <div>
+                  <div class="fw-medium"><i class="bi bi-google me-1"></i>Google Search</div>
+                  <div class="text-muted" style="font-size: 0.8rem;">Instruct agent how and when to search</div>
+                </div>
+              </label>
+              <!-- Knowledge Base -->
+              <label class="list-group-item d-flex align-items-center py-2" style="cursor: pointer;">
+                <input class="form-check-input me-2 mt-0" type="checkbox" id="gen_use_rag">
+                <div>
+                  <div class="fw-medium"><i class="bi bi-journal-text me-1"></i>Knowledge Base</div>
+                  <div class="text-muted" style="font-size: 0.8rem;">Instruct agent to retrieve internal docs</div>
+                </div>
+              </label>
+            </div>
           </div>
         </div>
       </div>
@@ -337,6 +353,8 @@ SupportPilot Admin{% endblock %} {% block content %}
       );
       const mode = modeRadio ? modeRadio.value : "professional";
       const useCamera = document.getElementById("gen_use_camera").checked;
+      const useSearch = document.getElementById("gen_use_search").checked;
+      const useRag = document.getElementById("gen_use_rag").checked;
 
       // Loading state
       const originalText = btnModalGenerate.innerHTML;
@@ -360,6 +378,8 @@ SupportPilot Admin{% endblock %} {% block content %}
             context,
             mode,
             use_camera: useCamera,
+            use_search: useSearch,
+            use_rag: useRag,
           }),
         });
 

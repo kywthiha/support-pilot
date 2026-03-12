@@ -422,6 +422,8 @@ def generate_system_prompt(request):
         context = data.get("context", "")
         mode = data.get("mode", "professional")  # professional | friendly | general
         use_camera = data.get("use_camera", False)
+        use_search = data.get("use_search", False)
+        use_rag = data.get("use_rag", False)
         gen_model = data.get("model", "")  # optional model override
 
         if not name:
@@ -485,6 +487,36 @@ def generate_system_prompt(request):
                 "- If `analyze_screen` returns ANALYSIS_FAILED: ask the user to hold still for a moment."
             )
 
+        # ── Dynamic Capabilities ─────────────────────────────────────
+        tools_list = []
+        if use_search:
+            tools_list.append("**`google_search`** — Search web for docs, articles, known issues. Always search before answering from memory.")
+        if use_rag:
+            tools_list.append("**`knowledge_base`** (RAG) — Search internal docs. FIRST source of truth before external search.")
+        tools_list.append(vision_tool_desc)
+        tools_list.append("**`send_copy_text`** — Send text (URLs, IDs, codes) to clipboard. NOT for step-by-step guides.")
+        
+        tools_str = "\n".join(f"{i+1}. {tool}" for i, tool in enumerate(tools_list))
+
+        caps = ["voice", "vision"]
+        if use_search: caps.append("search")
+        if use_rag: caps.append("knowledge base")
+        caps_str = ", ".join(caps)
+
+        rules_list = [
+            "- Plain text with markdown headings, NOT in code blocks.",
+            "- Make it specific to the agent's domain if a description is given.",
+            "- Comprehensive but concise."
+        ]
+        if use_search and use_rag:
+            rules_list.append("- Emphasize using knowledge_base + google_search before base knowledge.")
+        elif use_search:
+            rules_list.append("- Emphasize using google_search before answering from base knowledge.")
+        elif use_rag:
+            rules_list.append("- Emphasize using knowledge_base before answering from base knowledge.")
+            
+        rules_str = "\n".join(rules_list)
+
         # ── Build optimized meta-prompt ──────────────────────────────
         prompt = (
             f"You are an expert prompt engineer. Write a production-ready system instruction "
@@ -503,23 +535,17 @@ def generate_system_prompt(request):
             f"{vision_context}\n"
             f"- Talks via real-time voice (NOT text chat)\n\n"
             f"## Tools (include usage guidance for ALL)\n"
-            f"1. **`google_search`** — Search web for docs, articles, known issues. Always search before answering from memory.\n"
-            f"2. **`knowledge_base`** (RAG) — Search internal docs. FIRST source of truth before external search.\n"
-            f"3. {vision_tool_desc}\n"
-            f"4. **`send_copy_text`** — Send text (URLs, IDs, codes) to clipboard. NOT for step-by-step guides.\n\n"
+            f"{tools_str}\n\n"
             f"## Required Sections\n"
             f"1. Identity & Role\n"
-            f"2. Core Capabilities (vision, voice, search, knowledge)\n"
+            f"2. Core Capabilities ({caps_str})\n"
             f"3. Tool Usage Guide (when/how to use each tool)\n"
             f"4. Voice & Conversational Rules (voice-natural, language matching, silent tool use)\n"
             f"5. Support Flow (step-by-step)\n"
-            f"6. Guardrails (privacy, no guessing, search first)\n"
+            f"6. Guardrails (privacy, no guessing)\n"
             f"7. Error Handling:\n{vision_error_hint}\n\n"
             f"## Rules\n"
-            f"- Plain text with markdown headings, NOT in code blocks.\n"
-            f"- Make it specific to the agent's domain if a description is given.\n"
-            f"- Emphasize using knowledge_base + google_search before base knowledge.\n"
-            f"- Comprehensive but concise.\n"
+            f"{rules_str}\n"
         )
 
         from google import genai
