@@ -70,6 +70,10 @@ def deploy_agent_service(agent_id: str, agent_key: str) -> str:
 
     service.template.containers = [container]
     
+    # Increase the request timeout to 60 minutes (3600 seconds) - maximum allowed by Cloud Run
+    import google.protobuf.duration_pb2 as duration_pb2
+    service.template.timeout = duration_pb2.Duration(seconds=3600)
+    
     # Make it publicly accessible (or require IAM - usually public for websockets)
     # We set ingress to ALL
     service.ingress = run_v2.IngressTraffic.INGRESS_TRAFFIC_ALL
@@ -98,7 +102,7 @@ def deploy_agent_service(agent_id: str, agent_key: str) -> str:
 
         # Wait for the operation to complete
         logger.info("Waiting for deployment operation to complete...")
-        response = operation.result(timeout=180) # 3 min timeout
+        response = operation.result(timeout=600) # 10 min timeout
         
         # After creating the service, we must also ensure unauthenticated invocation is allowed 
         # so customer browsers can hit the WebSocket.

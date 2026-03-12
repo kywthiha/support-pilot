@@ -300,7 +300,7 @@ async def live_websocket(
             return
 
         reconnect_count = 0
-        max_reconnects = 10
+        max_reconnects = 30
         while reconnect_count < max_reconnects:
             should_reconnect = False
             should_break = False
