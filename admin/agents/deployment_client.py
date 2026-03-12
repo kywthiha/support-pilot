@@ -2,6 +2,7 @@
 
 import os
 import logging
+import time
 from pathlib import Path
 from dotenv import load_dotenv
 from google.cloud import run_v2
@@ -65,6 +66,7 @@ def deploy_agent_service(agent_id: str, agent_key: str) -> str:
     env_vars.append(run_v2.EnvVar(name="GOOGLE_GENAI_USE_VERTEXAI", value=os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "TRUE")))
     env_vars.append(run_v2.EnvVar(name="GOOGLE_CLOUD_PROJECT", value=PROJECT_ID))
     env_vars.append(run_v2.EnvVar(name="GOOGLE_CLOUD_LOCATION", value=LOCATION))
+    env_vars.append(run_v2.EnvVar(name="DEPLOY_TIMESTAMP", value=str(int(time.time()))))
 
     container.env = env_vars
 

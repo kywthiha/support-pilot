@@ -63,40 +63,6 @@ SupportPilot Admin{% endblock %} {% block content %}
             </div>
           </div>
         </div>
-
-        <!-- AI Generation Options -->
-        <div class="card border-primary border-opacity-25 mb-3" id="ai-gen-options">
-          <div class="card-body py-2 px-3">
-            <div class="row align-items-center g-2">
-              <div class="col-12 col-md-auto">
-                <small class="text-muted fw-medium me-2">Mode:</small>
-                <div class="btn-group btn-group-sm" role="group" aria-label="Support mode">
-                  <input type="radio" class="btn-check" name="support_mode" id="mode_professional" value="professional" checked>
-                  <label class="btn btn-outline-secondary" for="mode_professional">
-                    <i class="bi bi-briefcase"></i> Professional
-                  </label>
-                  <input type="radio" class="btn-check" name="support_mode" id="mode_friendly" value="friendly">
-                  <label class="btn btn-outline-secondary" for="mode_friendly">
-                    <i class="bi bi-emoji-smile"></i> Friendly
-                  </label>
-                  <input type="radio" class="btn-check" name="support_mode" id="mode_general" value="general">
-                  <label class="btn btn-outline-secondary" for="mode_general">
-                    <i class="bi bi-globe2"></i> General
-                  </label>
-                </div>
-              </div>
-              <div class="col-12 col-md-auto ms-md-auto">
-                <div class="form-check form-switch mb-0">
-                  <input class="form-check-input" type="checkbox" id="use_camera" role="switch">
-                  <label class="form-check-label small" for="use_camera">
-                    <i class="bi bi-camera"></i> Mobile Camera
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {{ form.instruction }}
         <div class="form-text">{{ form.instruction.help_text }}</div>
         {% if form.instruction.errors %}
@@ -191,20 +157,140 @@ SupportPilot Admin{% endblock %} {% block content %}
   </div>
 </div>
 
+<!-- ── AI Generate Modal ────────────────────────────────────────── -->
+<div
+  class="modal fade"
+  id="generateModal"
+  tabindex="-1"
+  aria-labelledby="generateModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title" id="generateModalLabel">
+          <i class="bi bi-magic text-primary me-2"></i>Generate System
+          Instruction
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body pt-2">
+        <!-- Short Description -->
+        <div class="mb-3">
+          <label for="gen_context" class="form-label small fw-medium"
+            >Short Description</label
+          >
+          <textarea
+            class="form-control form-control-sm"
+            id="gen_context"
+            rows="2"
+            placeholder="e.g. Help customers troubleshoot billing issues on our SaaS platform"
+          ></textarea>
+          <div class="form-text">
+            Brief context to guide the AI generation.
+          </div>
+        </div>
+
+        <!-- Mode Selector -->
+        <div class="mb-3">
+          <label class="form-label small fw-medium">Support Mode</label>
+          <div
+            class="btn-group w-100"
+            role="group"
+            aria-label="Support mode"
+          >
+            <input
+              type="radio"
+              class="btn-check"
+              name="gen_mode"
+              id="gen_mode_professional"
+              value="professional"
+              checked
+            />
+            <label
+              class="btn btn-outline-secondary"
+              for="gen_mode_professional"
+            >
+              <i class="bi bi-briefcase"></i> Professional
+            </label>
+            <input
+              type="radio"
+              class="btn-check"
+              name="gen_mode"
+              id="gen_mode_friendly"
+              value="friendly"
+            />
+            <label class="btn btn-outline-secondary" for="gen_mode_friendly">
+              <i class="bi bi-emoji-smile"></i> Friendly
+            </label>
+            <input
+              type="radio"
+              class="btn-check"
+              name="gen_mode"
+              id="gen_mode_general"
+              value="general"
+            />
+            <label class="btn btn-outline-secondary" for="gen_mode_general">
+              <i class="bi bi-globe2"></i> General
+            </label>
+          </div>
+        </div>
+
+
+        <!-- Camera Toggle -->
+        <div class="form-check form-switch">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="gen_use_camera"
+            role="switch"
+          />
+          <label class="form-check-label small" for="gen_use_camera">
+            <i class="bi bi-camera me-1"></i> Support Mobile Camera
+          </label>
+          <div class="form-text">
+            Enable if the agent will receive camera feed instead of screen
+            share.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-top-0 pt-0">
+        <button
+          type="button"
+          class="btn btn-outline-secondary btn-sm"
+          data-bs-dismiss="modal"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary btn-sm"
+          id="btn-modal-generate"
+        >
+          <i class="bi bi-magic"></i> Generate
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    // Toggle Google Search options visibility based on master switch
+    // Toggle Google Search options visibility
     const searchEnabledToggle = document.getElementById(
       "{{ form.google_search_enabled.id_for_label }}",
     );
     const searchOptions = document.getElementById("google-search-options");
 
     function updateSearchOptions() {
-      if (searchEnabledToggle.checked) {
-        searchOptions.style.display = "block";
-      } else {
-        searchOptions.style.display = "none";
-      }
+      searchOptions.style.display = searchEnabledToggle.checked
+        ? "block"
+        : "none";
     }
 
     if (searchEnabledToggle) {
@@ -212,7 +298,7 @@ SupportPilot Admin{% endblock %} {% block content %}
       updateSearchOptions();
     }
 
-    // Generate System Prompt AI integration
+    // ── Generate with AI → open modal ──────────────────────────────
     const btnGenerate = document.getElementById("btn-generate-prompt");
     const nameField = document.getElementById("{{ form.name.id_for_label }}");
     const descField = document.getElementById(
@@ -221,69 +307,80 @@ SupportPilot Admin{% endblock %} {% block content %}
     const instructionField = document.getElementById(
       "{{ form.instruction.id_for_label }}",
     );
+    const modalEl = document.getElementById("generateModal");
+    const modal = new bootstrap.Modal(modalEl);
 
-    if (btnGenerate) {
-      btnGenerate.addEventListener("click", async function () {
-        const name = nameField.value.trim();
-        const description = descField.value.trim();
+    // Click "Generate with AI" → validate name → open modal
+    btnGenerate.addEventListener("click", function () {
+      if (!nameField.value.trim()) {
+        alert("Please enter an Agent Name first.");
+        nameField.focus();
+        return;
+      }
+      // Pre-fill context from description if empty
+      const genCtx = document.getElementById("gen_context");
+      if (!genCtx.value && descField.value.trim()) {
+        genCtx.value = descField.value.trim();
+      }
+      modal.show();
+    });
 
-        if (!name) {
-          alert("Please enter an Agent Name first.");
-          nameField.focus();
-          return;
+    // Click "Generate" inside modal → call API
+    const btnModalGenerate = document.getElementById("btn-modal-generate");
+
+    btnModalGenerate.addEventListener("click", async function () {
+      const name = nameField.value.trim();
+      const description = descField.value.trim();
+      const context = document.getElementById("gen_context").value.trim();
+      const modeRadio = document.querySelector(
+        'input[name="gen_mode"]:checked',
+      );
+      const mode = modeRadio ? modeRadio.value : "professional";
+      const useCamera = document.getElementById("gen_use_camera").checked;
+
+      // Loading state
+      const originalText = btnModalGenerate.innerHTML;
+      btnModalGenerate.innerHTML =
+        '<span class="spinner-border spinner-border-sm me-1"></span>Generating…';
+      btnModalGenerate.disabled = true;
+
+      try {
+        const csrftoken = document.querySelector(
+          "[name=csrfmiddlewaretoken]",
+        ).value;
+        const response = await fetch('{% url "generate_system_prompt" %}', {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken,
+          },
+          body: JSON.stringify({
+            name,
+            description,
+            context,
+            mode,
+            model,
+            use_camera: useCamera,
+          }),
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          instructionField.value = data.prompt;
+          modal.hide();
+        } else {
+          alert(
+            "Error generating prompt: " + (data.error || "Unknown error"),
+          );
         }
-
-        // Get selected mode
-        const modeRadio = document.querySelector('input[name="support_mode"]:checked');
-        const mode = modeRadio ? modeRadio.value : "professional";
-
-        // Get camera toggle
-        const useCamera = document.getElementById("use_camera").checked;
-
-        // Show loading state
-        const originalText = btnGenerate.innerHTML;
-        btnGenerate.innerHTML =
-          '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
-        btnGenerate.disabled = true;
-
-        try {
-          // Send to backend endpoint
-          const csrftoken = document.querySelector(
-            "[name=csrfmiddlewaretoken]",
-          ).value;
-          const response = await fetch('{% url "generate_system_prompt" %}', {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRFToken": csrftoken,
-            },
-            body: JSON.stringify({
-              name: name,
-              description: description,
-              mode: mode,
-              use_camera: useCamera,
-            }),
-          });
-
-          const data = await response.json();
-
-          if (response.ok) {
-            instructionField.value = data.prompt;
-          } else {
-            alert(
-              "Error generating prompt: " + (data.error || "Unknown error"),
-            );
-          }
-        } catch (error) {
-          console.error("Fetch error:", error);
-          alert("Failed to connect to the server.");
-        } finally {
-          // Restore button state
-          btnGenerate.innerHTML = originalText;
-          btnGenerate.disabled = false;
-        }
-      });
-    }
+      } catch (err) {
+        console.error("Fetch error:", err);
+        alert("Failed to connect to the server.");
+      } finally {
+        btnModalGenerate.innerHTML = originalText;
+        btnModalGenerate.disabled = false;
+      }
+    });
   });
 </script>
 {% endblock %}

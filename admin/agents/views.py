@@ -422,6 +422,7 @@ def generate_system_prompt(request):
         context = data.get("context", "")
         mode = data.get("mode", "professional")  # professional | friendly | general
         use_camera = data.get("use_camera", False)
+        gen_model = data.get("model", "")  # optional model override
 
         if not name:
             return JsonResponse({"error": "Agent name is required to generate a prompt."}, status=400)
@@ -531,7 +532,7 @@ def generate_system_prompt(request):
         else:
             client = genai.Client()
             
-        observe_model = os.environ.get("OBSERVE_MODEL", "gemini-3-flash-preview")
+        observe_model = gen_model or os.environ.get("OBSERVE_MODEL", "gemini-3-flash-preview")
         response = client.models.generate_content(
             model=observe_model,
             contents=prompt,
