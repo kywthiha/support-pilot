@@ -65,7 +65,7 @@ graph TD
     Agent -.->|"Load Config<br>on Boot"| Firestore
     
     %% ── Tools → Google Cloud ──
-    AnalyzeScreen -.->|"Frame → Gemini Flash<br>→ ScreenAnalysis JSON"| GenAI
+    AnalyzeScreen -.->|"Latest Buffered Frame → Gemini Flash<br>→ ScreenAnalysis JSON"| GenAI
     KnowledgeBase <-->|"Semantic Search<br>in Uploaded Docs"| VertexRAG
     PreloadMemory -.->|"Query Past Sessions"| MemoryBank
     SendCopyText -.->|"Push via WebSocket"| WS
@@ -172,7 +172,6 @@ sequenceDiagram
         
         alt Screen guidance needed
             Gemini->>ADK: analyze_screen()
-            ADK->>Tools: Analyze latest frame with Gemini Flash
             Tools-->>ADK: ScreenAnalysis JSON
             ADK->>Gemini: Structured screen context
         end

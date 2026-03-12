@@ -15,7 +15,7 @@ Most support bots are turn-based text chatbots. SupportPilot breaks the "text bo
 | Feature                           | Description                                                                                                 |
 | --------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | 🎙️ **Live Voice Conversation**    | Natural, real-time voice interaction powered by Gemini Live API. No turn-taking — just talk.                |
-| 👁️ **Screen Vision**              | Passively observes the user's screen at 1 FPS. The agent _sees_ what you see and gives precise guidance.    |
+| 👁️ **Screen Vision**              | The agent can request a snapshot of your screen anytime to give precise guidance (using Gemini Flash to analyze the UI). |
 | 🔊 **Barge-in / Interruption**    | Interrupt the agent mid-sentence — it stops immediately and listens. Natural conversation flow.             |
 | 📋 **Copy-to-Clipboard**          | Agent pushes text, code snippets, or config values directly to the user's screen for easy copy-paste.       |
 | 🔍 **Google Search (Grounded)**   | Searches official documentation domains in real-time. No hallucinations — answers grounded in real sources. |
@@ -310,9 +310,11 @@ sequenceDiagram
 
         alt Agent analyzes screen
             Gemini->>ADK: Tool call: analyze_screen
-            ADK->>Tools: Capture + analyze frame
-            Tools-->>ADK: Screen analysis (UI state, errors, navigation)
-            ADK->>Gemini: Tool response
+            ADK->>Tools: Capture latest 1FPS frame
+            Tools->>GenAI: Send frame to Gemini Flash
+            GenAI-->>Tools: Structured UI State JSON
+            Tools-->>ADK: ScreenAnalysis JSON
+            ADK->>Gemini: Structured screen context
         end
 
         alt Agent sends copyable text
@@ -329,13 +331,12 @@ sequenceDiagram
     Note over User, Gemini: User can interrupt (barge-in) at any time
 ```
 
-### Key Technical Decisions
-
-1. **1 FPS Screen Capture** — Balances real-time awareness with bandwidth. The agent doesn't need 30fps to understand a UI.
-2. **Passive Observation** — Screen frames are streamed continuously. The agent can reference what it sees without explicit tool calls.
-3. **Interleaved I/O** — Audio and video flow simultaneously through the same Gemini Live API session.
-4. **Dynamic Agent Provisioning** — Each agent gets its own Cloud Run container with isolated config, tools, and knowledge base.
-5. **Grounding via RAG + Search** — Prevents hallucinations by anchoring responses in uploaded documents and official documentation.
+1. **Optimized Screen Capture** — The React client captures the screen at 1 FPS and buffers it on the server.
+2. **On-Demand Vision Analysis** — The agent doesn't passively process every frame (which would be slow and expensive). Instead, it uses an `analyze_screen` tool to actively request the latest frame when it needs visual context.
+3. **Dual-Model Approach** — The main voice loop runs on `gemini-live-2.5-flash-native-audio` (Live API), while the `analyze_screen` tool offloads the visual analysis to a separate `gemini-3-flash-preview` call, returning structured JSON (UI state, errors, etc.) back to the main agent.
+4. **Interleaved I/O** — Audio and video flow seamlessly through the application architecture.
+5. **Dynamic Agent Provisioning** — Each agent gets its own Cloud Run container with isolated config, tools, and knowledge base.
+6. **Grounding via RAG + Search** — Prevents hallucinations by anchoring responses in uploaded documents and official documentation.
 
 ---
 
