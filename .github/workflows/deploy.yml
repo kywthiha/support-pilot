@@ -1,0 +1,67 @@
+name: Deploy SupportPilot to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Set up environment variables
+env:
+  PROJECT_ID: ${{ secrets.GOOGLE_CLOUD_PROJECT }}
+  REGION: ${{ secrets.GOOGLE_CLOUD_LOCATION }}
+  ADMIN_SERVICE_NAME: ${{ secrets.ADMIN_SERVICE_NAME }}
+  AGENT_IMAGE_NAME: gcr.io/${{ secrets.GOOGLE_CLOUD_PROJECT }}/${{ secrets.AGENT_IMAGE_NAME }}:latest
+
+jobs:
+  build-agent:
+    name: Build Agent Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Authorize Docker Push
+        run: gcloud auth configure-docker
+
+      - name: Build and Push Agent Image
+        run: |
+          cd agent
+          gcloud builds submit --tag ${{ env.AGENT_IMAGE_NAME }} --region=${{ env.REGION }} --default-buckets-behavior=regional-user-owned-bucket .
+
+  deploy-admin:
+    name: Deploy Admin Panel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Deploy Admin Panel to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.ADMIN_SERVICE_NAME }} \
+            --source ./admin \
+            --region ${{ env.REGION }} \
+            --allow-unauthenticated \
+            --set-env-vars "GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }}" \
+            --set-env-vars "GOOGLE_CLOUD_LOCATION=${{ env.REGION }}" \
+            --set-env-vars "BASE_AGENT_IMAGE=${{ env.AGENT_IMAGE_NAME }}" \
+            --set-env-vars "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" \
+            --set-env-vars "FIRESTORE_DATABASE=${{ secrets.FIRESTORE_DATABASE }}"

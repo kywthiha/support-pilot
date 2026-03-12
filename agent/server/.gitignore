@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env
+
+# Data and credentials
+data/
+*.json
+!requirements.txt
+rag_docs/*
+!rag_docs/README.md
+
+# Editor and OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+static

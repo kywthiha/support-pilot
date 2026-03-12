@@ -1,0 +1,97 @@
+{% extends "agents/base.html" %}
+
+{% block title %}Agents — SupportPilot Admin{% endblock %}
+
+{% block content %}
+<div class="page-header row align-items-center g-3">
+    <div class="col-12 col-md-auto me-auto">
+        <h2 class="mb-1 d-flex align-items-center gap-2">
+            <i class="bi bi-robot fs-4 bg-primary text-white rounded p-2 d-inline-flex" style="line-height:1;"></i>
+            Agents
+        </h2>
+        <p class="text-secondary mb-0 mt-1">Manage your customer support voice assistants</p>
+    </div>
+    <div class="col-12 col-md-auto">
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-end">
+            <form method="post" action="{% url 'seed_demo_agent' %}" class="m-0 d-grid d-sm-inline-block">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-white border bg-white shadow-sm text-dark hover-bg-light fw-medium w-100">
+                    <i class="bi bi-magic text-info me-1"></i> Seed Demo
+                </button>
+            </form>
+            <a href="{% url 'agent_create' %}" class="btn btn-primary shadow-sm fw-medium">
+                <i class="bi bi-plus-lg me-1"></i> New Agent
+            </a>
+        </div>
+    </div>
+</div>
+
+{% if agents %}
+<div class="row g-4 mt-2">
+    {% for agent in agents %}
+    <div class="col-12 col-md-6 col-xl-4">
+        <div class="card h-100 border-0 shadow-sm position-relative overflow-hidden">
+            {% if agent.is_demo %}
+            <div class="position-absolute top-0 end-0 bg-indigo-100 text-indigo-700 px-3 py-1 rounded-bl-lg fw-bold" style="font-size: 0.75rem; background-color: #e0e7ff; color: #4338ca; border-bottom-left-radius: 12px;">
+                DEMO
+            </div>
+            {% endif %}
+            
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-robot fs-4 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;"></i>
+                    <div>
+                        <h5 class="card-title fw-bold mb-0 text-dark">{{ agent.name }}</h5>
+                        <p class="mb-0 text-muted small" style="font-size: 0.8rem;">ID: <code>{{ agent.id|truncatechars:12 }}</code></p>
+                    </div>
+                </div>
+                
+                <p class="card-text text-secondary mb-4" style="font-size: 0.9rem; line-height: 1.5; min-height: 2.7rem;">
+                    {{ agent.description|default:"No description provided for this agent."|truncatewords:15 }}
+                </p>
+                
+                <div class="d-flex gap-2 flex-wrap mb-2">
+                    <span class="badge bg-light text-dark border"><i class="bi bi-mic text-secondary me-1"></i> {{ agent.voice_name|default:"Kore" }}</span>
+                    <span class="badge bg-light text-google border" style="border-color: rgba(66, 133, 244, 0.3) !important;"><i class="bi bi-google me-1"></i> Search</span>
+                    {% if agent.knowledge_enabled %}
+                    <span class="badge bg-light text-info border border-info-subtle"><i class="bi bi-journal-text me-1"></i> RAG</span>
+                    {% endif %}
+                    {% if agent.service_url %}
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle"><i class="bi bi-cloud-check-fill me-1"></i> Active</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card-footer bg-light p-3 border-top d-flex gap-2 justify-content-between">
+                <a href="{% url 'agent_detail' agent.id %}" class="btn btn-sm btn-white border flex-grow-1 text-center font-medium bg-white hover-bg-light transition-all">
+                    View Details
+                </a>
+                <a href="{% url 'agent_edit' agent.id %}" class="btn btn-sm btn-primary flex-grow-1 text-center font-medium transition-all shadow-sm">
+                    Edit Agent
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5 my-4 bg-white rounded-4 border shadow-sm">
+    <i class="bi bi-robot fs-1 d-inline-flex align-items-center justify-content-center bg-light text-secondary rounded-circle mb-4" style="width: 80px; height: 80px;"></i>
+    <h4 class="mb-2 fw-bold text-dark">No agents configured yet</h4>
+    <p class="text-muted mb-4 mx-auto" style="max-width: 400px; font-size: 0.95rem;">
+        Get started by creating your first AI customer support voice assistant, or seed our pre-configured SaaS demo to explore.
+    </p>
+    <div class="d-grid gap-2 d-sm-flex justify-content-center mt-4">
+        <form method="post" action="{% url 'seed_demo_agent' %}" class="m-0 d-grid d-sm-inline-block">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-white border bg-white shadow-sm text-dark hover-bg-light fw-medium w-100">
+                <i class="bi bi-magic text-info me-1"></i> Seed Demo
+            </button>
+        </form>
+        <a href="{% url 'agent_create' %}" class="btn btn-primary shadow-sm fw-medium">
+            <i class="bi bi-plus-lg me-1"></i> Create Agent
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

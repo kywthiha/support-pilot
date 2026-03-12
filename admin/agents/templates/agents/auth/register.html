@@ -1,0 +1,56 @@
+{% extends "agents/base.html" %}
+
+{% block title %}Register — SupportPilot{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <div class="card">
+        <div class="card-body p-4">
+            <div class="text-center mb-4">
+                <i class="bi bi-person-plus display-4" style="color: #06b6d4;"></i>
+                <h3 class="mt-2">Create Account</h3>
+                <p class="text-secondary">Start building your support agents</p>
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="id_email" class="form-label">Email</label>
+                    {{ form.email }}
+                    {{ form.email.errors }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_password1" class="form-label">Password</label>
+                    {{ form.password1 }}
+                    {{ form.password1.errors }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_password2" class="form-label">Confirm Password</label>
+                    {{ form.password2 }}
+                    {{ form.password2.errors }}
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 mt-2">
+                    <i class="bi bi-person-plus"></i> Create Account
+                </button>
+            </form>
+
+            <div class="text-center mt-3">
+                <span class="text-secondary">Already have an account?</span>
+                <a href="{% url 'login' %}" style="color: #8b5cf6;">Sign in</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

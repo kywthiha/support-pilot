@@ -1,0 +1,249 @@
+{% extends "agents/base.html" %} {% block title %}Create Agent —
+SupportPilot Admin{% endblock %} {% block content %}
+<div class="page-header">
+  <h2>
+    <i
+      class="bi bi-plus-circle text-white bg-primary bg-opacity-10 p-2 rounded me-2"
+    ></i>
+    Create New Agent
+  </h2>
+  <p class="text-secondary">Configure a new customer support agent</p>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger p-2 mb-3">
+        <ul class="mb-0 ps-3">
+          {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="id_name" class="form-label">Agent Name *</label>
+          {{ form.name }} {% if form.name.errors %}
+          <div class="text-danger small mt-1">{{ form.name.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="col-md-6">
+          <label for="id_agent_key" class="form-label">Agent Key</label>
+          {{ form.agent_key }}
+          <div class="form-text">{{ form.agent_key.help_text }}</div>
+          {% if form.agent_key.errors %}
+          <div class="text-danger small mt-1">
+            {{ form.agent_key.errors.0 }}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <label for="id_description" class="form-label">Description</label>
+        {{ form.description }}
+      </div>
+
+      <div class="mt-3">
+        <div class="row align-items-end mb-2 g-2">
+          <div class="col-12 col-sm-auto me-auto">
+            <label for="id_instruction" class="form-label mb-0"
+              >System Instruction *</label
+            >
+          </div>
+          <div class="col-12 col-sm-auto">
+            <div class="d-grid d-sm-block">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary w-100"
+                id="btn-generate-prompt"
+              >
+                <i class="bi bi-magic"></i> Generate with AI
+              </button>
+            </div>
+          </div>
+        </div>
+        {{ form.instruction }}
+        <div class="form-text">{{ form.instruction.help_text }}</div>
+        {% if form.instruction.errors %}
+        <div class="text-danger small mt-1">
+          {{ form.instruction.errors.0 }}
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="row g-3 mt-1">
+        <div class="col-md-4">
+          <label for="id_voice_name" class="form-label"
+            >Voice <i class="bi bi-mic text-secondary"></i
+          ></label>
+          {{ form.voice_name }}
+        </div>
+      </div>
+
+      <h5 class="mt-4 mb-3 border-bottom pb-2">
+        <i class="bi bi-tools text-secondary bg-light p-2 rounded me-2"></i>
+        Agent Tools
+      </h5>
+      <div class="row g-3">
+        <!-- Google Search Settings -->
+        <div class="col-md-6">
+          <div
+            class="card h-100 shadow-sm"
+            style="border-color: rgba(66, 133, 244, 0.4)"
+          >
+            <div
+              class="card-header bg-light py-2"
+              style="border-bottom: 1px solid rgba(66, 133, 244, 0.2)"
+            >
+              <div class="form-check form-switch mb-0">
+                {{ form.google_search_enabled }}
+                <label
+                  class="form-check-label fw-bold text-google mb-0"
+                  for="{{ form.google_search_enabled.id_for_label }}"
+                >
+                  <i class="bi bi-google"></i> Google Search
+                </label>
+              </div>
+            </div>
+            <div class="card-body bg-light" id="google-search-options">
+              <label
+                for="{{ form.search_domains.id_for_label }}"
+                class="form-label small fw-medium"
+                >Search Domains (Optional)</label
+              >
+              {{ form.search_domains }}
+              <div class="form-text small">
+                {{ form.search_domains.help_text }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Knowledge Base Settings -->
+        <div class="col-md-6">
+          <div class="card h-100 border-info border-opacity-25 shadow-sm">
+            <div class="card-header bg-info bg-opacity-10 py-2">
+              <div class="form-check form-switch mb-0">
+                {{ form.knowledge_enabled }}
+                <label
+                  class="form-check-label fw-bold text-info mb-0"
+                  for="{{ form.knowledge_enabled.id_for_label }}"
+                >
+                  <i class="bi bi-journal-text"></i> Knowledge Base (RAG)
+                </label>
+              </div>
+            </div>
+            <div class="card-body bg-light d-flex align-items-center">
+              <p class="form-text small mb-0">
+                {{ form.knowledge_enabled.help_text }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 d-grid gap-2 d-sm-flex">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-lg"></i> Create Agent
+        </button>
+        <a href="{% url 'agent_list' %}" class="btn btn-outline-secondary"
+          >Cancel</a
+        >
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Toggle Google Search options visibility based on master switch
+    const searchEnabledToggle = document.getElementById(
+      "{{ form.google_search_enabled.id_for_label }}",
+    );
+    const searchOptions = document.getElementById("google-search-options");
+
+    function updateSearchOptions() {
+      if (searchEnabledToggle.checked) {
+        searchOptions.style.display = "block";
+      } else {
+        searchOptions.style.display = "none";
+      }
+    }
+
+    if (searchEnabledToggle) {
+      searchEnabledToggle.addEventListener("change", updateSearchOptions);
+      updateSearchOptions();
+    }
+
+    // Generate System Prompt AI integration
+    const btnGenerate = document.getElementById("btn-generate-prompt");
+    const nameField = document.getElementById("{{ form.name.id_for_label }}");
+    const descField = document.getElementById(
+      "{{ form.description.id_for_label }}",
+    );
+    const instructionField = document.getElementById(
+      "{{ form.instruction.id_for_label }}",
+    );
+
+    if (btnGenerate) {
+      btnGenerate.addEventListener("click", async function () {
+        const name = nameField.value.trim();
+        const description = descField.value.trim();
+
+        if (!name) {
+          alert("Please enter an Agent Name first.");
+          nameField.focus();
+          return;
+        }
+
+        // Show loading state
+        const originalText = btnGenerate.innerHTML;
+        btnGenerate.innerHTML =
+          '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
+        btnGenerate.disabled = true;
+
+        try {
+          // Send to backend endpoint
+          const csrftoken = document.querySelector(
+            "[name=csrfmiddlewaretoken]",
+          ).value;
+          const response = await fetch('{% url "generate_system_prompt" %}', {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": csrftoken,
+            },
+            body: JSON.stringify({
+              name: name,
+              description: description,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            instructionField.value = data.prompt;
+          } else {
+            alert(
+              "Error generating prompt: " + (data.error || "Unknown error"),
+            );
+          }
+        } catch (error) {
+          console.error("Fetch error:", error);
+          alert("Failed to connect to the server.");
+        } finally {
+          // Restore button state
+          btnGenerate.innerHTML = originalText;
+          btnGenerate.disabled = false;
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

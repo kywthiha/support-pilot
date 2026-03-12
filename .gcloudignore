@@ -1,0 +1,10 @@
+.git
+.gitignore
+.venv
+__pycache__
+client/node_modules
+client/dist
+.env
+server/.env
+server/venv
+server/__pycache__

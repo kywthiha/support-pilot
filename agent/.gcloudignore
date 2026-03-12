@@ -1,0 +1,12 @@
+.git
+.gitignore
+node_modules/
+client/node_modules/
+dist/
+client/dist/
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+*.md

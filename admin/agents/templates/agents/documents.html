@@ -1,0 +1,129 @@
+{% extends "agents/base.html" %} {% block title %}Manage Documents — {{
+agent.name }}{% endblock %} {% block content %}
+<div class="page-header row align-items-center g-3">
+  <div class="col-12 col-md-auto me-auto">
+    <h2 class="mb-1 d-flex align-items-center gap-2">
+      <i
+        class="bi bi-folder2-open text-white bg-primary bg-opacity-10 p-2 rounded me-2"
+      ></i>
+      Document Library
+    </h2>
+    <p class="text-secondary mb-0 mt-1">
+      Manage knowledge base files for <strong>{{ agent.name }}</strong>
+    </p>
+  </div>
+  <div class="col-12 col-md-auto">
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-end">
+      <a
+        href="{% url 'agent_detail' agent.id %}"
+        class="btn btn-outline-secondary"
+      >
+        <i class="bi bi-arrow-left"></i> Back to Agent
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-md-4 mb-4">
+    <!-- Upload Card -->
+    <div class="card h-100 shadow-sm">
+      <div class="card-header bg-transparent border-bottom-0 pb-0">
+        <h5 class="card-title mb-0">
+          <i
+            class="bi bi-cloud-upload text-white bg-primary p-2 rounded me-2"
+          ></i>
+          Upload New
+        </h5>
+      </div>
+      <div class="card-body">
+        <p class="small text-secondary mb-4">
+          Upload PDFs, TXTs, or internal guidelines to directly expand the
+          agent's knowledge base via Vertex AI RAG.
+        </p>
+        <form
+          method="post"
+          action="{% url 'agent_upload_document' agent.id %}"
+          enctype="multipart/form-data"
+        >
+          {% csrf_token %}
+          <div class="mb-3">
+            {{ upload_form.file }}
+            <div class="form-text mt-2">{{ upload_form.file.help_text }}</div>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-upload"></i> Upload Document
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-8 mb-4">
+    <!-- Document List Card -->
+    <div class="card shadow-sm h-100">
+      <div
+        class="card-header bg-transparent d-flex justify-content-between align-items-center"
+      >
+        <h5 class="mb-0">
+          <i class="bi bi-files text-dark bg-light p-2 rounded me-2"></i>
+          Uploaded Documents
+        </h5>
+        <span class="badge bg-secondary rounded-pill"
+          >{{ documents|length }} Files</span
+        >
+      </div>
+      <div class="card-body p-0">
+        {% if documents %}
+        <div class="list-group list-group-flush">
+          {% for doc in documents %}
+          <div class="list-group-item p-3">
+            <div class="row align-items-center g-3">
+              <div class="col-12 col-sm-auto d-flex align-items-center gap-3">
+                <i
+                  class="bi bi-file-earmark-pdf text-white bg-danger p-2 rounded fs-4"
+                ></i>
+              </div>
+              <div class="col-12 col-sm">
+                <h6 class="mb-1 text-break">{{ doc.display_name }}</h6>
+                <small class="text-secondary text-break d-block">
+                  {{ doc.name }}
+                </small>
+              </div>
+              <div class="col-12 col-sm-auto">
+                <form
+                  method="post"
+                  action="{% url 'agent_delete_document' agent.id doc.name %}"
+                  class="d-grid d-sm-block"
+                >
+                  {% csrf_token %}
+                  <button
+                    type="submit"
+                    class="btn btn-outline-danger btn-sm"
+                    title="Delete document"
+                    onclick="
+                      return confirm(
+                        'Are you sure you want to permanently delete this document from the agent corpus?',
+                      );
+                    "
+                  >
+                    <i class="bi bi-trash"></i>
+                    <span class="d-inline d-sm-none ms-1">Delete</span>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+          <i class="bi bi-folder-x display-4 text-light mt-2 mb-3"></i>
+          <p class="text-secondary">No documents uploaded yet.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

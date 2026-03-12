@@ -1,0 +1,47 @@
+services:
+  # The FastAPI Agent Runner & Vite React Client
+  supportpilot-agent:
+    build:
+      context: ./agent
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      ALLOWED_ORIGINS: "http://localhost:8080,http://localhost:5173"
+      AGENT_MODEL: "gemini-live-2.5-flash-native-audio"
+      OBSERVE_MODEL: "gemini-3-flash-preview"
+      GOOGLE_GENAI_USE_VERTEXAI: "TRUE"
+      GOOGLE_CLOUD_PROJECT: ""
+      GOOGLE_CLOUD_LOCATION: ""
+      # GOOGLE_API_KEY: "your_key_here"
+      # Uncomment to use a GCP service account:
+      # Required Roles: "Vertex AI User" (for Gemini) & "Cloud Datastore User" or "Firebase Admin" (for Firestore)
+      # Doc: https://cloud.google.com/iam/docs/keys-create-delete
+      # GOOGLE_APPLICATION_CREDENTIALS: "/app/service-account.json"
+    volumes:
+      - ./agent/server:/app
+      # Uncomment to mount the GCP service account key:
+      # - ./service-account.json:/app/service-account.json:ro
+    command: uvicorn main:app --host 0.0.0.0 --port 8080 --reload
+    restart: unless-stopped
+
+  # The Django Admin Panel
+  supportpilot-admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8080"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      DJANGO_DEBUG: "True"
+      # Uncomment to use a GCP service account:
+      # Required Roles: "Vertex AI User" (for Gemini) & "Cloud Datastore User" or "Firebase Admin" (for Firestore)
+      # Doc: https://cloud.google.com/iam/docs/keys-create-delete
+      # GOOGLE_APPLICATION_CREDENTIALS: "/app/service-account.json"
+    volumes:
+      - ./admin:/app
+      # Uncomment to mount the GCP service account key:
+      # - ./service-account.json:/app/service-account.json:ro
+    restart: unless-stopped
