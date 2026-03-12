@@ -414,67 +414,111 @@ def agent_delete_document(request, agent_id, doc_name):
 @login_required
 @require_POST
 def generate_system_prompt(request):
-    """Generate a system prompt using Gemini based on agent name and description."""
+    """Generate a system prompt using Gemini based on agent name, description, mode, and camera setting."""
     try:
         data = json.loads(request.body)
         name = data.get("name", "")
         description = data.get("description", "")
         context = data.get("context", "")
+        mode = data.get("mode", "professional")  # professional | friendly | general
+        use_camera = data.get("use_camera", False)
 
         if not name:
             return JsonResponse({"error": "Agent name is required to generate a prompt."}, status=400)
 
-        # Build enhanced generation prompt
+        # ── Mode-specific tone & style directives ────────────────────
+        MODE_DIRECTIVES = {
+            "professional": (
+                "Tone: strictly professional, formal, enterprise-grade. "
+                "No slang, no emojis, no casual language. "
+                "Use precise terminology. Be concise and authoritative. "
+                "Follow a rigid step-by-step customer support flow: "
+                "Greet → Observe → Guide (one step at a time) → Verify → Wrap Up."
+            ),
+            "friendly": (
+                "Tone: warm, casual, empathetic, and approachable — like a helpful colleague. "
+                "Use friendly language, occasional light humor, and encouraging phrases. "
+                "Be patient and reassuring. Still follow a support flow but keep it conversational: "
+                "greet warmly, understand their problem, walk them through it step by step, "
+                "celebrate when things work."
+            ),
+            "general": (
+                "Tone: versatile and adaptive. This is a general-purpose assistant "
+                "that can help with ANY topic — not limited to customer support. "
+                "Be knowledgeable, flexible, and helpful across a wide range of subjects. "
+                "Adapt your formality to match the user. If they ask about software, guide them. "
+                "If they ask general questions, answer helpfully. Be a Swiss-army-knife assistant."
+            ),
+        }
+
+        tone_directive = MODE_DIRECTIVES.get(mode, MODE_DIRECTIVES["professional"])
+
+        # ── Vision input description (camera vs screen share) ────────
+        if use_camera:
+            vision_context = (
+                "- Receives a passive 1 FPS **mobile camera feed** showing the user's real-world environment "
+                "(physical products, labels, documents, hardware, equipment, QR codes, etc.)\n"
+                "- Can analyze real-world objects, text on physical surfaces, barcodes, device screens, etc."
+            )
+            vision_tool_desc = (
+                "**`analyze_screen`** — Analyze the camera feed in detail. The passive 1 FPS feed "
+                "is usually sufficient. ONLY call this for complex visual tasks: reading small text "
+                "on labels, decoding serial numbers, inspecting fine details on hardware."
+            )
+            vision_error_hint = (
+                "- If `analyze_screen` errors with NO_FRAME: ask the user to point their camera at the item.\n"
+                "- If `analyze_screen` returns ANALYSIS_FAILED: ask the user to hold the camera steady and ensure good lighting."
+            )
+        else:
+            vision_context = (
+                "- Receives a passive 1 FPS **screen share** of the caller's screen\n"
+                "- Can see which page, menus, forms, and UI elements are visible"
+            )
+            vision_tool_desc = (
+                "**`analyze_screen`** — Analyze the customer's screen in detail. The passive 1 FPS feed "
+                "is usually sufficient. ONLY call this for complex visual tasks: reading small error text, "
+                "dense settings pages, data tables."
+            )
+            vision_error_hint = (
+                "- If `analyze_screen` errors with NO_FRAME: ask the user to share their screen.\n"
+                "- If `analyze_screen` returns ANALYSIS_FAILED: ask the user to hold still for a moment."
+            )
+
+        # ── Build optimized meta-prompt ──────────────────────────────
         prompt = (
-            "You are an expert prompt engineer specializing in real-time customer support AI agents "
-            "for SaaS software platforms (ERP systems, cloud management consoles, hosting panels, "
-            "CRM platforms, custom business applications, etc.).\n\n"
-            "Write a highly effective, production-ready system instruction for a live, real-time "
-            "voice-based customer support AI agent.\n\n"
+            f"You are an expert prompt engineer. Write a production-ready system instruction "
+            f"for a real-time voice-based AI agent.\n\n"
             f"Agent Name: {name}\n"
         )
         if description:
-            prompt += f"Agent Target / Description: {description}\n"
+            prompt += f"Description: {description}\n"
         if context:
-            prompt += f"Additional Context: {context}\n"
-        
+            prompt += f"Context: {context}\n"
+
         prompt += (
-            "\n## Agent Platform Context\n"
-            "The agent operates in a live voice call environment with these capabilities:\n"
-            "- Receives a passive 1 FPS screen share of the caller's screen\n"
-            "- Talks to customers via real-time voice (NOT text chat)\n"
-            "- Has access to the following tools:\n\n"
-            "### Available Tools (MUST include usage guidance for ALL of these)\n"
-            "1. **`google_search`** — Search the web for official documentation, help articles, "
-            "community forums, release notes, and known issues. The agent should ALWAYS search "
-            "before answering technical questions from memory.\n"
-            "2. **`knowledge_base`** (RAG) — Search internal/uploaded documentation, product guides, "
-            "SOPs, and troubleshooting procedures specific to this product. This should be the "
-            "FIRST source of truth — check before searching externally. Combine with google_search "
-            "for the most complete answer.\n"
-            "3. **`analyze_screen`** — Analyze the customer's screen in detail. The passive 1 FPS feed "
-            "is usually sufficient, so ONLY call this for complex visual tasks (small text, dense "
-            "settings, error messages, data tables).\n"
-            "4. **`send_copy_text`** — Send text (URLs, IDs, API keys, config snippets, code) to the "
-            "customer's clipboard. Do NOT use for step-by-step guides.\n\n"
-            "## Required Sections in Output\n"
-            "Write the system instruction with these sections:\n"
-            "1. **Identity & Role** — Who the agent is and what software/product it supports\n"
-            "2. **Core Capabilities** — See, Hear & Speak, Think, Search, Knowledge Base\n"
-            "3. **Tool Usage Guide** — Detailed guidance for EACH tool: google_search, knowledge_base, "
-            "analyze_screen, send_copy_text. When to use each, how to use them effectively, and "
-            "how to combine them.\n"
-            "4. **Voice-Only & Conversational Rules** — Voice-natural output, language matching, "
-            "silent tool use, professional tone\n"
-            "5. **Customer Support Flow** — Step-by-step flow: Greet, Observe, Guide, Verify, Wrap Up\n"
-            "6. **Crucial Guardrails** — Privacy, no guessing (search first), screen share always on\n"
-            "7. **Error Handling** — How to handle analyze_screen errors (NO_FRAME, ANALYSIS_FAILED)\n\n"
-            "## Important Rules\n"
-            "- Write the instruction as plain text with markdown headings, NOT wrapped in code blocks.\n"
-            "- Make it specific to the agent's software domain if a description is provided.\n"
-            "- Emphasize that the agent must ALWAYS use `knowledge_base` and `google_search` tools "
-            "to find answers before relying on its base knowledge.\n"
-            "- The instruction should be comprehensive but concise — aim for production quality.\n"
+            f"\n## Style\n{tone_directive}\n\n"
+            f"## Platform\n"
+            f"Live voice call environment:\n"
+            f"{vision_context}\n"
+            f"- Talks via real-time voice (NOT text chat)\n\n"
+            f"## Tools (include usage guidance for ALL)\n"
+            f"1. **`google_search`** — Search web for docs, articles, known issues. Always search before answering from memory.\n"
+            f"2. **`knowledge_base`** (RAG) — Search internal docs. FIRST source of truth before external search.\n"
+            f"3. {vision_tool_desc}\n"
+            f"4. **`send_copy_text`** — Send text (URLs, IDs, codes) to clipboard. NOT for step-by-step guides.\n\n"
+            f"## Required Sections\n"
+            f"1. Identity & Role\n"
+            f"2. Core Capabilities (vision, voice, search, knowledge)\n"
+            f"3. Tool Usage Guide (when/how to use each tool)\n"
+            f"4. Voice & Conversational Rules (voice-natural, language matching, silent tool use)\n"
+            f"5. Support Flow (step-by-step)\n"
+            f"6. Guardrails (privacy, no guessing, search first)\n"
+            f"7. Error Handling:\n{vision_error_hint}\n\n"
+            f"## Rules\n"
+            f"- Plain text with markdown headings, NOT in code blocks.\n"
+            f"- Make it specific to the agent's domain if a description is given.\n"
+            f"- Emphasize using knowledge_base + google_search before base knowledge.\n"
+            f"- Comprehensive but concise.\n"
         )
 
         from google import genai

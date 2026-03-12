@@ -63,6 +63,40 @@ SupportPilot Admin{% endblock %} {% block content %}
             </div>
           </div>
         </div>
+
+        <!-- AI Generation Options -->
+        <div class="card border-primary border-opacity-25 mb-3" id="ai-gen-options">
+          <div class="card-body py-2 px-3">
+            <div class="row align-items-center g-2">
+              <div class="col-12 col-md-auto">
+                <small class="text-muted fw-medium me-2">Mode:</small>
+                <div class="btn-group btn-group-sm" role="group" aria-label="Support mode">
+                  <input type="radio" class="btn-check" name="support_mode" id="mode_professional" value="professional" checked>
+                  <label class="btn btn-outline-secondary" for="mode_professional">
+                    <i class="bi bi-briefcase"></i> Professional
+                  </label>
+                  <input type="radio" class="btn-check" name="support_mode" id="mode_friendly" value="friendly">
+                  <label class="btn btn-outline-secondary" for="mode_friendly">
+                    <i class="bi bi-emoji-smile"></i> Friendly
+                  </label>
+                  <input type="radio" class="btn-check" name="support_mode" id="mode_general" value="general">
+                  <label class="btn btn-outline-secondary" for="mode_general">
+                    <i class="bi bi-globe2"></i> General
+                  </label>
+                </div>
+              </div>
+              <div class="col-12 col-md-auto ms-md-auto">
+                <div class="form-check form-switch mb-0">
+                  <input class="form-check-input" type="checkbox" id="use_camera" role="switch">
+                  <label class="form-check-label small" for="use_camera">
+                    <i class="bi bi-camera"></i> Mobile Camera
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {{ form.instruction }}
         <div class="form-text">{{ form.instruction.help_text }}</div>
         {% if form.instruction.errors %}
@@ -199,6 +233,13 @@ SupportPilot Admin{% endblock %} {% block content %}
           return;
         }
 
+        // Get selected mode
+        const modeRadio = document.querySelector('input[name="support_mode"]:checked');
+        const mode = modeRadio ? modeRadio.value : "professional";
+
+        // Get camera toggle
+        const useCamera = document.getElementById("use_camera").checked;
+
         // Show loading state
         const originalText = btnGenerate.innerHTML;
         btnGenerate.innerHTML =
@@ -219,6 +260,8 @@ SupportPilot Admin{% endblock %} {% block content %}
             body: JSON.stringify({
               name: name,
               description: description,
+              mode: mode,
+              use_camera: useCamera,
             }),
           });
 

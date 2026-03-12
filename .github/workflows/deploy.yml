@@ -58,6 +58,7 @@ jobs:
         run: |
           gcloud run deploy ${{ env.ADMIN_SERVICE_NAME }} \
             --source ./admin \
+            --timeout 600 \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
             --set-env-vars "GOOGLE_CLOUD_PROJECT=${{ env.PROJECT_ID }}" \
