@@ -239,6 +239,28 @@ The repository includes a fully automated CI/CD pipeline. Pushing to `main` trig
 
 ---
 
+## 🧪 Reproducible Testing (For Judges)
+
+We strongly encourage judges to test the live multimodal experience! 
+
+### How to test:
+1. **Open the Live Demo**: Go to the provided Cloud Run URL in the links section above. (Please use Google Chrome for best voice/video compatibility).
+2. **Grant Permissions**: The browser will ask for Microphone and Screen Recording permissions. Both are strictly required. (For your privacy, we recommend sharing a specific browser tab or application window rather than your entire desktop).
+3. **Start the Session**: Click the "Connect" button. The agent will greet you with voice.
+4. **Test the Vision**:
+   - Open a complex webpage or SaaS application in the window you are sharing (e.g., GitHub, a Google Cloud console, or a Shopify admin panel).
+   - Say: *"Can you analyze my screen and tell me what page I'm on?"* 
+   - Observe how the agent accurately describes your UI.
+5. **Test the RAG / Search**:
+   - Say: *"Search the documentation for how to deploy a Next.js app on Vercel."* 
+   - The agent will use its `google_search` tool and answer you based on grounded documentation.
+6. **Test the Barge-in Mechanism**:
+   - Ask the agent a long question, like *"Explain the history of the internet."*
+   - While the agent is speaking, abruptly interrupt it: *"Wait, stop, tell me about the Python language instead."*
+   - Notice how the agent instantly halts its previous sentence and seamlessly pivots to your new question.
+
+---
+
 ## 📁 Repository Structure
 
 ```text
