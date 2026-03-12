@@ -6,38 +6,38 @@ SupportPilot is a real-time, multimodal AI customer support agent that **sees yo
 
 Most support bots are turn-based text chatbots. SupportPilot breaks the "text box" paradigm with a fully live, interruptible voice agent powered by Google's Gemini Live API and Agent Development Kit.
 
-🏆 **Category:** Live Agents — [Gemini Live Agent Challenge](https://devpost.com/)
+🏆 **Category:** Live Agents — [Gemini Live Agent Challenge](https://geminiliveagentchallenge.devpost.com)
 
 ---
 
 ## ✨ Key Features
 
-| Feature | Description |
-|---|---|
-| 🎙️ **Live Voice Conversation** | Natural, real-time voice interaction powered by Gemini Live API. No turn-taking — just talk. |
-| 👁️ **Screen Vision** | Passively observes the user's screen at 1 FPS. The agent *sees* what you see and gives precise guidance. |
-| 🔊 **Barge-in / Interruption** | Interrupt the agent mid-sentence — it stops immediately and listens. Natural conversation flow. |
-| 📋 **Copy-to-Clipboard** | Agent pushes text, code snippets, or config values directly to the user's screen for easy copy-paste. |
-| 🔍 **Google Search (Grounded)** | Searches official documentation domains in real-time. No hallucinations — answers grounded in real sources. |
-| 📚 **Knowledge Base (RAG)** | Upload internal PDFs, SOPs, or manuals. The agent searches them via Vertex AI RAG for precise answers. |
-| 🧠 **Session Memory** | Uses Vertex AI Memory Bank. Users can return later and the agent remembers past interactions. |
-| 🏗️ **Multi-Tenant Admin Panel** | Django-based dashboard to create, configure, and deploy new agents — no code required. |
-| 🚀 **One-Click Cloud Deployment** | Deploy agents directly to Google Cloud Run from the admin panel UI. |
-| 🤖 **AI Prompt Generator** | Auto-generates system prompts with built-in tool usage guidance using Gemini. |
+| Feature                           | Description                                                                                                 |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| 🎙️ **Live Voice Conversation**    | Natural, real-time voice interaction powered by Gemini Live API. No turn-taking — just talk.                |
+| 👁️ **Screen Vision**              | Passively observes the user's screen at 1 FPS. The agent _sees_ what you see and gives precise guidance.    |
+| 🔊 **Barge-in / Interruption**    | Interrupt the agent mid-sentence — it stops immediately and listens. Natural conversation flow.             |
+| 📋 **Copy-to-Clipboard**          | Agent pushes text, code snippets, or config values directly to the user's screen for easy copy-paste.       |
+| 🔍 **Google Search (Grounded)**   | Searches official documentation domains in real-time. No hallucinations — answers grounded in real sources. |
+| 📚 **Knowledge Base (RAG)**       | Upload internal PDFs, SOPs, or manuals. The agent searches them via Vertex AI RAG for precise answers.      |
+| 🧠 **Session Memory**             | Uses Vertex AI Memory Bank. Users can return later and the agent remembers past interactions.               |
+| 🏗️ **Multi-Tenant Admin Panel**   | Django-based dashboard to create, configure, and deploy new agents — no code required.                      |
+| 🚀 **One-Click Cloud Deployment** | Deploy agents directly to Google Cloud Run from the admin panel UI.                                         |
+| 🤖 **AI Prompt Generator**        | Auto-generates system prompts with built-in tool usage guidance using Gemini.                               |
 
 ---
 
 ## 🎬 Links for Judges
 
-| Resource | Link |
-|---|---|
-| **Demo Video** | [YouTube Link — Insert Here] |
-| **GCP Deployment Proof** | [YouTube Link — Insert Here] |
-| **Live Demo** | [Cloud Run URL — Insert Here] |
-| **Architecture Diagram** | [architecture.md](architecture.md) |
-| **Admin Panel Guide** | [ADMIN_PANEL_USER_GUIDE.md](admin/ADMIN_PANEL_USER_GUIDE.md) |
-| **RAG Guide** | [RAG_USER_GUIDE.md](admin/RAG_USER_GUIDE.md) |
-| **CI/CD Guide** | [GITHUB_ACTIONS_DEPLOYMENT.md](GITHUB_ACTIONS_DEPLOYMENT.md) |
+| Resource                 | Link                                                         |
+| ------------------------ | ------------------------------------------------------------ |
+| **Demo Video**           | [YouTube Link — Insert Here]                                 |
+| **GCP Deployment Proof** | [YouTube Link — Insert Here]                                 |
+| **Live Demo**            | [Cloud Run URL — Insert Here]                                |
+| **Architecture Diagram** | [architecture.md](architecture.md)                           |
+| **Admin Panel Guide**    | [ADMIN_PANEL_USER_GUIDE.md](admin/ADMIN_PANEL_USER_GUIDE.md) |
+| **RAG Guide**            | [RAG_USER_GUIDE.md](admin/RAG_USER_GUIDE.md)                 |
+| **CI/CD Guide**          | [GITHUB_ACTIONS_DEPLOYMENT.md](GITHUB_ACTIONS_DEPLOYMENT.md) |
 
 ---
 
@@ -103,20 +103,20 @@ graph TD
 
 ## 🛠️ Tech Stack (Google Cloud Native)
 
-| Layer | Technology | Purpose |
-|---|---|---|
-| **AI Model** | Gemini 2.5 Flash (Live API) | Real-time voice + vision processing |
+| Layer               | Technology                         | Purpose                                             |
+| ------------------- | ---------------------------------- | --------------------------------------------------- |
+| **AI Model**        | Gemini 2.5 Flash (Live API)        | Real-time voice + vision processing                 |
 | **Agent Framework** | Google Agent Development Kit (ADK) | Agent lifecycle, tool execution, session management |
-| **SDK** | Google GenAI SDK | Gemini API access for screen analysis |
-| **Knowledge Base** | Vertex AI RAG | PDF/document retrieval for grounded answers |
-| **Memory** | Vertex AI Memory Bank | Cross-session user context retention |
-| **Database** | Cloud Firestore | Agent configuration storage |
-| **Hosting** | Google Cloud Run | Serverless container deployment (admin + agents) |
-| **Admin Backend** | Django + Firestore | Agent management dashboard |
-| **Agent Backend** | FastAPI + WebSockets | Real-time bidirectional communication |
-| **Frontend** | React + Vite + TypeScript | Customer-facing support UI |
-| **CI/CD** | GitHub Actions | Automated build and deployment pipeline |
-| **Container** | Docker + Docker Compose | Local development and production builds |
+| **SDK**             | Google GenAI SDK                   | Gemini API access for screen analysis               |
+| **Knowledge Base**  | Vertex AI RAG                      | PDF/document retrieval for grounded answers         |
+| **Memory**          | Vertex AI Memory Bank              | Cross-session user context retention                |
+| **Database**        | Cloud Firestore                    | Agent configuration storage                         |
+| **Hosting**         | Google Cloud Run                   | Serverless container deployment (admin + agents)    |
+| **Admin Backend**   | Django + Firestore                 | Agent management dashboard                          |
+| **Agent Backend**   | FastAPI + WebSockets               | Real-time bidirectional communication               |
+| **Frontend**        | React + Vite + TypeScript          | Customer-facing support UI                          |
+| **CI/CD**           | GitHub Actions                     | Automated build and deployment pipeline             |
+| **Container**       | Docker + Docker Compose            | Local development and production builds             |
 
 ### Third-Party Integrations
 
@@ -177,10 +177,10 @@ docker-compose up --build
 
 **Step 4 — Access the application:**
 
-| Service | URL |
-|---|---|
-| Admin Panel | http://localhost:8000 |
-| Agent Frontend | http://localhost:8080 |
+| Service         | URL                         |
+| --------------- | --------------------------- |
+| Admin Panel     | http://localhost:8000       |
+| Agent Frontend  | http://localhost:8080       |
 | Agent WebSocket | ws://localhost:8080/ws/live |
 
 **Step 5 — Create your first agent:**
@@ -211,6 +211,7 @@ chmod +x deploy.sh
 ```
 
 This will:
+
 1. Build the agent Docker image and push to Container Registry
 2. Deploy the Django admin panel to Cloud Run
 3. Output the live admin panel URL
@@ -230,6 +231,7 @@ The admin panel needs permission to dynamically spin up Cloud Run containers. In
 ### Option 3: GitHub Actions CI/CD (Automated)
 
 The repository includes a fully automated CI/CD pipeline. Pushing to `main` triggers:
+
 1. Agent image build + push to Container Registry
 2. Admin panel deployment to Cloud Run
 
@@ -349,6 +351,6 @@ sequenceDiagram
 
 ## 📄 License
 
-This project was created for the [Gemini Live Agent Challenge](https://devpost.com/) hackathon.
+This project was created for the [Gemini Live Agent Challenge](https://geminiliveagentchallenge.devpost.com) hackathon.
 
 Built with ❤️ using Google Cloud, Gemini, and the Agent Development Kit.
