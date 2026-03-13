@@ -3,20 +3,33 @@
 Welcome to the SupportPilot Admin Panel! This comprehensive guide will walk you through everything you need to know to manage your AI Voice Agents, from account creation to deployment and knowledge base management.
 
 ## Table of Contents
-1. [Getting Started (Authentication)](#1-getting-started-authentication)
-2. [Managing Agents (CRUD Operations)](#2-managing-agents-crud-operations)
+1. [Initial Setup & Deployment (Recommended)](#1-initial-setup--deployment-recommended)
+2. [Getting Started (Authentication)](#2-getting-started-authentication)
+3. [Managing Agents (CRUD Operations)](#3-managing-agents-crud-operations)
    - [Viewing Your Agents](#viewing-your-agents)
    - [Creating a New Agent](#creating-a-new-agent)
    - [Using AI to Generate Prompts](#using-ai-to-generate-prompts)
    - [Seeding a Demo Agent](#seeding-a-demo-agent)
    - [Editing an Agent](#editing-an-agent)
    - [Deleting an Agent](#deleting-an-agent)
-3. [Deploying Agents](#3-deploying-agents)
-4. [Managing the Knowledge Base (RAG)](#4-managing-the-knowledge-base-rag)
+4. [Deploying Agents](#4-deploying-agents)
+5. [Managing the Knowledge Base (RAG)](#5-managing-the-knowledge-base-rag)
 
 ---
 
-## 1. Getting Started (Authentication)
+## 1. Initial Setup & Deployment (Recommended)
+
+The quickest and most reliable way to set up the SupportPilot Admin Panel is using the included GitHub Actions CI/CD pipeline.
+
+1. **Fork the Repository:** Create a fork of this repository to your own GitHub account.
+2. **Follow the CI/CD Guide:** Follow the detailed instructions in the [GITHUB_ACTIONS_DEPLOYMENT.md](../GITHUB_ACTIONS_DEPLOYMENT.md) guide to configure your GitHub repository secrets and variables.
+3. **Manual Firestore Setup:** Before your first deployment, ensure you manually create a **Firestore Database** in **Native mode** within your Google Cloud project. It is recommended to choose the **(default)** location for your database.
+
+Once deployed automatically by GitHub Actions, you can access the public URL of the admin panel.
+
+---
+
+## 2. Getting Started (Authentication)
 
 The admin panel uses secure email and password authentication, backed by Google Cloud Firestore.
 
@@ -26,7 +39,7 @@ The admin panel uses secure email and password authentication, backed by Google 
 
 ---
 
-## 2. Managing Agents (CRUD Operations)
+## 3. Managing Agents (CRUD Operations)
 
 The Admin Panel allows you to create, read, update, and delete (CRUD) configurations for your custom support AI voice agents.
 
@@ -72,7 +85,7 @@ If you want to immediately see what a fully configured agent looks like:
 
 ---
 
-## 3. Deploying Agents
+## 4. Deploying Agents
 
 Once your agent is configured, you need to deploy it so it can start accepting real-time voice calls.
 
@@ -83,7 +96,7 @@ Once your agent is configured, you need to deploy it so it can start accepting r
 
 ---
 
-## 4. Managing the Knowledge Base (RAG)
+## 5. Managing the Knowledge Base (RAG)
 
 If you checked "Enable Knowledge Base" during the agent setup, you can upload custom documents (like PDFs or TXT files) for the AI to reference using Retrieval-Augmented Generation (RAG).
 

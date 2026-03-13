@@ -128,7 +128,6 @@ All third-party tools are used in accordance with their respective licenses and 
 
 ## 🚀 Spin-Up Instructions
 
-
 ### Option 1: Quick Local Run (Recommended for Local Dev)
 
 The fastest way to get the agent running locally without needing Google Cloud credentials is using our pre-built Docker image.
@@ -203,12 +202,18 @@ The admin panel needs permission to dynamically spin up Cloud Run containers. In
 
 ---
 
-### Option 3: GitHub Actions CI/CD (Automated)
+### Option 3: GitHub Actions CI/CD (Recommended for Admin Panel)
 
 The repository includes a fully automated CI/CD pipeline. Pushing to `main` triggers:
 
 1. Agent image build + push to Container Registry
 2. Admin panel deployment to Cloud Run
+
+For the quickest and most reliable setup of the Admin Panel, we strongly recommend forking this repository and using GitHub Actions.
+
+**Important Pre-Deployment Step:** Before your first deployment, ensure you manually create a **Firestore Database** in **Native mode** within your Google Cloud project. Choose the **(default)** location for your database.
+
+> 💡 **Once the Admin Panel is deployed**, you can dynamically create, configure, and manage as many Support Agents as you need directly through the Admin Panel UI without needing to redeploy code!
 
 👉 [Read the full GitHub Actions Deployment Guide](GITHUB_ACTIONS_DEPLOYMENT.md)
 
@@ -216,17 +221,7 @@ The repository includes a fully automated CI/CD pipeline. Pushing to `main` trig
 
 ## 🧪 Reproducible Testing (For Judges)
 
-We strongly encourage judges to experience the real-time multimodal AI support agent live!  
-No local setup required — test directly in the browser.
-
-### Live Demo Links
-
-- **Agent Interface (No authentication needed)**: https://agent-google-cloud-366697832591.us-east5.run.app  
-  → Jump straight in to test voice + screen vision + real-time guidance (Google Cloud support focus).
-- **Admin Panel (Requires quick registration)**: https://supportpilot-admin-366697832591.us-east5.run.app  
-  → Register/login → Create a new agent → Get a shareable session link to test custom agents.
-
-Both are auto-deployed to Google Cloud Run (stable URLs — won't change on updates). Tested 100% functional as of March 13, 2026.
+We strongly encourage judges to experience the real-time multimodal AI support agent!
 
 ### Quick Local Run
 
@@ -247,11 +242,22 @@ docker run -p 8080:8080 \
 Then, open your browser and visit:
 [http://localhost:8080/](http://localhost:8080/)
 
+### Live Demo Links
+
+> **⚠️ Note:** These live demo links are hosted on a personal Google Cloud account. They may be temporarily unavailable if budget alerts or pricing limits are reached. If the links are down, please use the **Quick Local Run** method above.
+
+- **Agent Interface (No authentication needed)**: https://agent-google-cloud-366697832591.us-east5.run.app  
+  → Jump straight in to test voice + screen vision + real-time guidance (Google Cloud support focus).
+- **Admin Panel (Requires quick registration)**: https://supportpilot-admin-366697832591.us-east5.run.app  
+  → Register/login → Create a new agent → Get a shareable session link to test custom agents.
+
+Both are auto-deployed to Google Cloud Run (stable URLs — won't change on updates). Tested 100% functional as of March 13, 2026.
+
 ### How to Test (5–10 Minutes)
 
 1. **Open in Google Chrome** (works in other modern browsers too).
 2. **Access the Agent Demo**:
-   - Visit: https://agent-google-cloud-366697832591.us-east5.run.app
+   - Visit: https://agent-google-cloud-366697832591.us-east5.run.app (or your local URL: http://localhost:8080/)
    - (Or from admin panel: create agent → copy session URL and open it.)
 3. **Grant Permissions**:
    - Allow **Microphone** and **Screen Recording** when prompted.
@@ -275,7 +281,7 @@ Then, open your browser and visit:
      - Say naturally: _"I'm stuck in the GCP console trying to enable billing export — walk me through it step by step."_
      - Listen for voice responses + on-screen highlights/instructions.
 6. **Optional: Create Custom Agent (Admin Panel)**:
-   - Go to https://supportpilot-admin-366697832591.us-east5.run.app
+   - Go to https://supportpilot-admin-366697832591.us-east5.run.app (or your local Admin Panel URL).
    - Register (email/password) → Click "Create Agent".
    - Configure (e.g., name, key and instruction) → Save → Deploy → Open the generated session URL.
    - Test same flows above with your custom setup.
