@@ -30,9 +30,9 @@ Most support bots are turn-based text chatbots. SupportPilot breaks the "text bo
 ## 🎬 Links for Judges
 
 | Resource                 | Link                                                         |
-| ------------------------ | ------------------------------------------------------------ | --- |
+| ------------------------ | ------------------------------------------------------------ |
 | **Demo Video**           | [YouTube Link](https://youtu.be/i3-u2h6vddA)                 |
-| **GCP Deployment Proof** | [YouTube Link](https://youtu.be/sPj2fDGeI04)                 |     |
+| **GCP Deployment Proof** | [YouTube Link](https://youtu.be/sPj2fDGeI04)                 |
 | **Architecture Diagram** | [architecture.md](architecture.md)                           |
 | **Admin Panel Guide**    | [ADMIN_PANEL_USER_GUIDE.md](admin/ADMIN_PANEL_USER_GUIDE.md) |
 | **RAG Guide**            | [RAG_USER_GUIDE.md](admin/RAG_USER_GUIDE.md)                 |
