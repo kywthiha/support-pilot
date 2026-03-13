@@ -8,3 +8,4 @@ __pycache__/
 .git/
 .gitignore
 *.md
+client/node_modules/

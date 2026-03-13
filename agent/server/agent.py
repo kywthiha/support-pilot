@@ -109,7 +109,7 @@ def _build_agent(config: dict | None = None) -> Agent:
         # No config = fallback to local environment variables
         google_search_enabled = True
         search_domains = settings.search_domain or ""
-        knowledge_enabled = True
+        knowledge_enabled = False
         rag_corpus = settings.rag_corpus
 
     # Google Search Tool Configuration
