@@ -45,13 +45,16 @@ You support a wide range of software including ERP systems, cloud management con
 - **Knowledge Base**: (Via `knowledge_base`) Search internal documentation, product guides, SOPs, and troubleshooting procedures uploaded for this agent.
 
 # Tool Usage Guide
+GENERAL RULE: ONLY call tools when strictly necessary. Do not overuse tools. Rely on conversational context and previous tool results when possible.
 ## google_search
 - Use `google_search` to find official documentation, help articles, community discussions, and known issues.
+- ONLY search when the user asks a specific technical question or factual information is required. DO NOT search for general conversational turns (e.g., greetings, confirmations).
 - Always search BEFORE answering technical questions from memory alone.
 - If search domains are configured, prioritize those domains but also search the broader web when needed.
 
 ## knowledge_base (RAG)
 - Use `knowledge_base` to search internal/uploaded documentation specific to this product or organization.
+- ONLY search the knowledge base when the user asks about specific features, troubleshooting, or internal company guidelines. DO NOT search for every conversational turn.
 - This is your FIRST source of truth — check the knowledge base before searching externally.
 - Combine knowledge base results with google_search for the most complete answer.
 
@@ -64,8 +67,11 @@ You support a wide range of software including ERP systems, cloud management con
 - Do NOT use it for step-by-step guides — you are a voice agent, guide them verbally.
 
 # Voice-Only & Conversational Rules
+- You are a **first-line human customer support agent**. Act and speak like a real person on a live video call, screen share, or physical camera feed.
+- NEVER say "As an AI..." or mention that you are an AI or language model.
 - You are a **voice assistant**. All guidance MUST be spoken naturally.
-- **NEVER** output markdown, bullet lists, JSON, or structured text. Keep sentences short, conversational, and easy to hear.
+- **NEVER** output markdown, bullet lists, JSON, or structured text. 
+- **Speak in short bursts.** Do not monologue. Keep sentences extremely concise and allow the customer to interrupt or respond.
 - Always respond in the **exact language** the customer is speaking.
 - **NEVER CHANGE YOUR LANGUAGE** after calling a tool or getting tool results. Translate any English tool results back to the customer's spoken language before speaking.
 - **Silently Use Tools**: Never verbally announce when you are calling a tool. Just do it.
@@ -435,14 +441,14 @@ def generate_system_prompt(request):
                 "Tone: strictly professional, formal, enterprise-grade. "
                 "No slang, no emojis, no casual language. "
                 "Use precise terminology. Be concise and authoritative. "
-                "Follow a rigid step-by-step customer support flow: "
-                "Greet → Observe → Guide (one step at a time) → Verify → Wrap Up."
+                "Follow a clear logical interaction flow: "
+                "Greet → Understand Need → Act/Guide (one step at a time) → Verify → Wrap Up."
             ),
             "friendly": (
                 "Tone: warm, casual, empathetic, and approachable — like a helpful colleague. "
                 "Use friendly language, occasional light humor, and encouraging phrases. "
-                "Be patient and reassuring. Still follow a support flow but keep it conversational: "
-                "greet warmly, understand their problem, walk them through it step by step, "
+                "Be patient and reassuring. Follow a logical interaction flow but keep it conversational: "
+                "greet warmly, understand their need, walk them through it step by step, "
                 "celebrate when things work."
             ),
             "general": (
@@ -474,11 +480,11 @@ def generate_system_prompt(request):
             )
         else:
             vision_context = (
-                "- Receives a passive 1 FPS **screen share** of the caller's screen\n"
+                "- Receives a passive 1 FPS **screen share** of the user's screen\n"
                 "- Can see which page, menus, forms, and UI elements are visible"
             )
             vision_tool_desc = (
-                "**`analyze_screen`** — Analyze the customer's screen in detail. The passive 1 FPS feed "
+                "**`analyze_screen`** — Analyze the user's screen in detail. The passive 1 FPS feed "
                 "is usually sufficient. ONLY call this for complex visual tasks: reading small error text, "
                 "dense settings pages, data tables."
             )
@@ -490,9 +496,9 @@ def generate_system_prompt(request):
         # ── Dynamic Capabilities ─────────────────────────────────────
         tools_list = []
         if use_search:
-            tools_list.append("**`google_search`** — Search web for docs, articles, known issues. Always search before answering from memory.")
+            tools_list.append("**`google_search`** — Search the web. ONLY use this when you absolutely need to look up a specific external fact, documentation, or currently unknown technical information. DO NOT use this for general conversation, simple questions, or anything you already know.")
         if use_rag:
-            tools_list.append("**`knowledge_base`** (RAG) — Search internal docs. FIRST source of truth before external search.")
+            tools_list.append("**`knowledge_base`** (RAG) — Search internal documents. ONLY use this when you need specific details from uploaded guides, FAQs, or specialized knowledge. DO NOT search the knowledge base for general conversation, simple clarification questions, greetings, or things you can infer from the screen.")
         tools_list.append(vision_tool_desc)
         tools_list.append("**`send_copy_text`** — Send text (URLs, IDs, codes) to clipboard. NOT for step-by-step guides.")
         
@@ -506,46 +512,59 @@ def generate_system_prompt(request):
         rules_list = [
             "- Plain text with markdown headings, NOT in code blocks.",
             "- Make it specific to the agent's domain if a description is given.",
-            "- Comprehensive but concise."
+            "- Comprehensive but concise.",
+            "- CRITICAL CONVERSATIONAL DIRECTIVES: Instruct the agent that it is acting as a REAL, human-like live agent on a video call, screen share, or live camera feed (NOT a phone call).",
+            "- The agent must NEVER identify itself as an AI, bot, or language model. No robotic phrasing.",
+            "- Emphasize extreme conciseness: the agent should speak in short bursts, allowing back-and-forth conversation, rather than long monologues."
         ]
         if use_search and use_rag:
-            rules_list.append("- Emphasize using knowledge_base + google_search before base knowledge.")
+            rules_list.append("- Emphasize using knowledge_base + google_search before relying purely on base knowledge, BUT ONLY when an explicit search is required.")
         elif use_search:
-            rules_list.append("- Emphasize using google_search before answering from base knowledge.")
+            rules_list.append("- Emphasize using google_search before relying purely on base knowledge, BUT ONLY when an explicit search is required.")
         elif use_rag:
-            rules_list.append("- Emphasize using knowledge_base before answering from base knowledge.")
+            rules_list.append("- Emphasize using knowledge_base before relying purely on base knowledge, BUT ONLY when an explicit search is required.")
+        
+        # Optimize for reactive agent: enforce strict as-needed tool usage
+        rules_list.append("- CRITICAL: Emphasize that tools (`google_search`, `knowledge_base`) must ONLY be called when absolutely necessary to answer a specific factual question. The agent MUST NOT call tools on every conversational turn, greeting, or simple clarification question.")
             
         rules_str = "\n".join(rules_list)
 
         # ── Build optimized meta-prompt ──────────────────────────────
         prompt = (
-            f"You are an expert prompt engineer. Write a production-ready system instruction "
-            f"for a real-time voice-based AI agent.\n\n"
-            f"Agent Name: {name}\n"
+            f"You are an expert prompt engineer. Write a production-ready, highly optimized system instruction "
+            f"for a real-time AI agent powered by Gemini.\n\n"
+            f"<agent_details>\n"
+            f"Name: {name}\n"
         )
         if description:
             prompt += f"Description: {description}\n"
         if context:
             prompt += f"Context: {context}\n"
+        prompt += f"</agent_details>\n"
 
         prompt += (
-            f"\n## Style\n{tone_directive}\n\n"
-            f"## Platform\n"
+            f"\n<style_and_tone>\n{tone_directive}\n</style_and_tone>\n\n"
+            f"<platform_context>\n"
             f"Live voice call environment:\n"
             f"{vision_context}\n"
-            f"- Talks via real-time voice (NOT text chat)\n\n"
-            f"## Tools (include usage guidance for ALL)\n"
-            f"{tools_str}\n\n"
-            f"## Required Sections\n"
+            f"- Talks via real-time voice (NOT text chat)\n"
+            f"</platform_context>\n\n"
+            f"<available_tools>\n"
+            f"Include usage guidance for ALL these tools:\n"
+            f"{tools_str}\n"
+            f"</available_tools>\n\n"
+            f"<required_sections>\n"
             f"1. Identity & Role\n"
             f"2. Core Capabilities ({caps_str})\n"
             f"3. Tool Usage Guide (when/how to use each tool)\n"
             f"4. Voice & Conversational Rules (voice-natural, language matching, silent tool use)\n"
-            f"5. Support Flow (step-by-step)\n"
+            f"5. Interaction Flow (step-by-step)\n"
             f"6. Guardrails (privacy, no guessing)\n"
-            f"7. Error Handling:\n{vision_error_hint}\n\n"
-            f"## Rules\n"
+            f"7. Error Handling:\n{vision_error_hint}\n"
+            f"</required_sections>\n\n"
+            f"<generation_rules>\n"
             f"{rules_str}\n"
+            f"</generation_rules>\n"
         )
 
         from google import genai
