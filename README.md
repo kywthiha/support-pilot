@@ -12,27 +12,27 @@ Most support bots are turn-based text chatbots. SupportPilot breaks the "text bo
 
 ## ✨ Key Features
 
-| Feature                           | Description                                                                                                 |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| 🎙️ **Live Voice Conversation**    | Natural, real-time voice interaction powered by Gemini Live API. No turn-taking — just talk.                |
+| Feature                           | Description                                                                                                              |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 🎙️ **Live Voice Conversation**    | Natural, real-time voice interaction powered by Gemini Live API. No turn-taking — just talk.                             |
 | 👁️ **Screen Vision**              | The agent can request a snapshot of your screen anytime to give precise guidance (using Gemini Flash to analyze the UI). |
-| 🔊 **Barge-in / Interruption**    | Interrupt the agent mid-sentence — it stops immediately and listens. Natural conversation flow.             |
-| 📋 **Copy-to-Clipboard**          | Agent pushes text, code snippets, or config values directly to the user's screen for easy copy-paste.       |
-| 🔍 **Google Search (Grounded)**   | Searches official documentation domains in real-time. No hallucinations — answers grounded in real sources. |
-| 📚 **Knowledge Base (RAG)**       | Upload internal PDFs, SOPs, or manuals. The agent searches them via Vertex AI RAG for precise answers.      |
-| 🧠 **Session Memory**             | Uses Vertex AI Memory Bank. Users can return later and the agent remembers past interactions.               |
-| 🏗️ **Multi-Tenant Admin Panel**   | Django-based dashboard to create, configure, and deploy new agents — no code required.                      |
-| 🚀 **One-Click Cloud Deployment** | Deploy agents directly to Google Cloud Run from the admin panel UI.                                         |
-| 🤖 **AI Prompt Generator**        | Auto-generates system prompts with built-in tool usage guidance using Gemini.                               |
+| 🔊 **Barge-in / Interruption**    | Interrupt the agent mid-sentence — it stops immediately and listens. Natural conversation flow.                          |
+| 📋 **Copy-to-Clipboard**          | Agent pushes text, code snippets, or config values directly to the user's screen for easy copy-paste.                    |
+| 🔍 **Google Search (Grounded)**   | Searches official documentation domains in real-time. No hallucinations — answers grounded in real sources.              |
+| 📚 **Knowledge Base (RAG)**       | Upload internal PDFs, SOPs, or manuals. The agent searches them via Vertex AI RAG for precise answers.                   |
+| 🧠 **Session Memory**             | Uses Vertex AI Memory Bank. Users can return later and the agent remembers past interactions.                            |
+| 🏗️ **Multi-Tenant Admin Panel**   | Django-based dashboard to create, configure, and deploy new agents — no code required.                                   |
+| 🚀 **One-Click Cloud Deployment** | Deploy agents directly to Google Cloud Run from the admin panel UI.                                                      |
+| 🤖 **AI Prompt Generator**        | Auto-generates system prompts with built-in tool usage guidance using Gemini.                                            |
 
 ---
 
 ## 🎬 Links for Judges
 
 | Resource                 | Link                                                         |
-| ------------------------ | ------------------------------------------------------------ |
+| ------------------------ | ------------------------------------------------------------ | --- |
 | **Demo Video**           | [YouTube Link](https://youtu.be/i3-u2h6vddA)                 |
-| **GCP Deployment Proof** | [YouTube Link](https://youtu.be/sPj2fDGeI04)                 |                              |
+| **GCP Deployment Proof** | [YouTube Link](https://youtu.be/sPj2fDGeI04)                 |     |
 | **Architecture Diagram** | [architecture.md](architecture.md)                           |
 | **Admin Panel Guide**    | [ADMIN_PANEL_USER_GUIDE.md](admin/ADMIN_PANEL_USER_GUIDE.md) |
 | **RAG Guide**            | [RAG_USER_GUIDE.md](admin/RAG_USER_GUIDE.md)                 |
@@ -144,50 +144,27 @@ All third-party tools are used in accordance with their respective licenses and 
 
 ---
 
-### Option 1: Docker Compose (Recommended for Local Dev)
+### Option 1: Quick Local Run (Recommended for Local Dev)
 
-The fastest way to get everything running locally.
+The fastest way to get the agent running locally without needing Google Cloud credentials is using our pre-built Docker image.
 
-**Step 1 — Configure environment variables:**
+**Step 1 — Get your Google AI Studio API Key:**
+Go to [Google AI Studio](https://aistudio.google.com/) and create a free API key.
 
-```bash
-# Admin panel
-cd admin
-cp .env.example .env
-# Edit .env → set GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION
-
-# Agent server
-cd ../agent
-cp .env.example .env
-# Edit .env → set GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION
-```
-
-**Step 2 — Authenticate with Google Cloud:**
+**Step 2 — Run the Docker container:**
 
 ```bash
-gcloud auth application-default login
+docker run -p 8080:8080 \
+  -e AGENT_MODEL="gemini-2.5-flash-native-audio-preview-12-2025" \
+  -e OBSERVE_MODEL="gemini-3-flash-preview" \
+  -e GOOGLE_API_KEY="<YOUR_GEMINI_API_KEY_FROM_GOOGLE_AI_STUDIO>" \
+  -e GOOGLE_GENAI_USE_VERTEXAI=FALSE \
+  kyawthihadev/support-agent:latest
 ```
 
-**Step 3 — Start all services:**
+**Step 3 — Access the application:**
 
-```bash
-docker-compose up --build
-```
-
-**Step 4 — Access the application:**
-
-| Service         | URL                         |
-| --------------- | --------------------------- |
-| Admin Panel     | http://localhost:8000       |
-| Agent Frontend  | http://localhost:8080       |
-| Agent WebSocket | ws://localhost:8080/ws/live |
-
-**Step 5 — Create your first agent:**
-
-1. Go to http://localhost:8000 → Register an account
-2. Click **"Seed Demo Agent"** to create a pre-configured SaaS support agent
-3. Or click **"Create Agent"** to build your own from scratch
-4. Open the agent frontend at http://localhost:8080 to start a live support session
+Open your browser and visit: [http://localhost:8080/](http://localhost:8080/)
 
 ---
 
@@ -239,10 +216,12 @@ The repository includes a fully automated CI/CD pipeline. Pushing to `main` trig
 ---
 
 ## 🧪 Reproducible Testing (For Judges)
+
 We strongly encourage judges to experience the real-time multimodal AI support agent live!  
 No local setup required — test directly in the browser.
 
 ### Live Demo Links
+
 - **Agent Interface (No authentication needed)**: https://agent-google-cloud-366697832591.us-east5.run.app  
   → Jump straight in to test voice + screen vision + real-time guidance (Google Cloud support focus).
 - **Admin Panel (Requires quick registration)**: https://supportpilot-admin-366697832591.us-east5.run.app  
@@ -250,7 +229,27 @@ No local setup required — test directly in the browser.
 
 Both are auto-deployed to Google Cloud Run (stable URLs — won't change on updates). Tested 100% functional as of March 13, 2026.
 
+### Quick Local Run
+
+We already host the image on Docker Hub, so you can run the default support agent directly:
+[kyawthihadev/support-agent](https://hub.docker.com/r/kyawthihadev/support-agent)
+
+Run the following command in your local terminal:
+
+```bash
+docker run -p 8080:8080 \
+  -e AGENT_MODEL="gemini-2.5-flash-native-audio-preview-12-2025" \
+  -e OBSERVE_MODEL="gemini-3-flash-preview" \
+  -e GOOGLE_API_KEY="<YOUR_GEMINI_API_KEY_FROM_GOOGLE_AI_STUDIO>" \
+  -e GOOGLE_GENAI_USE_VERTEXAI=FALSE \
+  kyawthihadev/support-agent:latest
+```
+
+Then, open your browser and visit:
+[http://localhost:8080/](http://localhost:8080/)
+
 ### How to Test (5–10 Minutes)
+
 1. **Open in Google Chrome** (works in other modern browsers too).
 2. **Access the Agent Demo**:
    - Visit: https://agent-google-cloud-366697832591.us-east5.run.app
@@ -264,17 +263,17 @@ Both are auto-deployed to Google Cloud Run (stable URLs — won't change on upda
 5. **Test Core Multimodal Features**:
    - **Vision / Screen Awareness**:
      - Share a complex SaaS page (e.g., Google Cloud Billing, IAM console, GitHub repo settings).
-     - Ask: *"What page am I looking at right now?"* or *"Analyze my screen — where is the 'Create budget alert' button?"*
+     - Ask: _"What page am I looking at right now?"_ or _"Analyze my screen — where is the 'Create budget alert' button?"_
      - Expect accurate description + step-by-step pointers based on 1 fps passive capture.
    - **Grounded RAG / Search**:
-     - Ask: *"How do I deploy a Next.js app to Vercel?"* or *"Search docs for setting up Cloud Run with custom domain."*
+     - Ask: _"How do I deploy a Next.js app to Vercel?"_ or _"Search docs for setting up Cloud Run with custom domain."_
      - Agent uses `google_search` tool → provides grounded, up-to-date answer with sources if needed.
    - **Barge-in / Real-Time Interruption**:
-     - Start a long response: *"Explain the full history of the internet from ARPANET to now."*
-     - While agent is speaking, interrupt loudly: *"Stop — tell me about Python instead!"*
+     - Start a long response: _"Explain the full history of the internet from ARPANET to now."_
+     - While agent is speaking, interrupt loudly: _"Stop — tell me about Python instead!"_
      - Agent should halt immediately and pivot seamlessly (Gemini Live API native support).
    - **Voice + Guidance Flow**:
-     - Say naturally: *"I'm stuck in the GCP console trying to enable billing export — walk me through it step by step."*
+     - Say naturally: _"I'm stuck in the GCP console trying to enable billing export — walk me through it step by step."_
      - Listen for voice responses + on-screen highlights/instructions.
 6. **Optional: Create Custom Agent (Admin Panel)**:
    - Go to https://supportpilot-admin-366697832591.us-east5.run.app
@@ -283,10 +282,11 @@ Both are auto-deployed to Google Cloud Run (stable URLs — won't change on upda
    - Test same flows above with your custom setup.
 
 ### Troubleshooting Tips
+
 - No audio? Check mic permissions + Chrome settings (chrome://settings/content/microphone).
 - Screen share fails? Ensure tab/window is active; retry permissions.
 - Latency? Normal for first connection (Gemini Live streaming); subsequent interactions are faster.
-- Issues? Fall back to local Docker Compose in README (quick setup with `docker compose up`).
+- Issues? Ensure you have set the `GOOGLE_API_KEY` correctly when running the Docker container.
 
 This live setup lets you fully experience the "see-hear-speak" immersion without any code/install. Thank you for testing — feedback welcome!
 
@@ -322,7 +322,6 @@ support-pilot/
 │   └── requirements.txt
 │
 ├── .github/workflows/deploy.yml    # CI/CD pipeline
-├── docker-compose.yml              # Local development setup
 ├── deploy.sh                       # Manual deployment script
 ├── architecture.md                 # Detailed architecture breakdown
 └── GITHUB_ACTIONS_DEPLOYMENT.md    # CI/CD setup guide
