@@ -31,9 +31,8 @@ Most support bots are turn-based text chatbots. SupportPilot breaks the "text bo
 
 | Resource                 | Link                                                         |
 | ------------------------ | ------------------------------------------------------------ |
-| **Demo Video**           | [YouTube Link — Insert Here]                                 |
-| **GCP Deployment Proof** | [YouTube Link — Insert Here]                                 |
-| **Live Demo**            | [Cloud Run URL — Insert Here]                                |
+| **Demo Video**           | [YouTube Link](https://youtu.be/i3-u2h6vddA)                 |
+| **GCP Deployment Proof** | [YouTube Link](https://youtu.be/sPj2fDGeI04)                 |                              |
 | **Architecture Diagram** | [architecture.md](architecture.md)                           |
 | **Admin Panel Guide**    | [ADMIN_PANEL_USER_GUIDE.md](admin/ADMIN_PANEL_USER_GUIDE.md) |
 | **RAG Guide**            | [RAG_USER_GUIDE.md](admin/RAG_USER_GUIDE.md)                 |
@@ -240,24 +239,56 @@ The repository includes a fully automated CI/CD pipeline. Pushing to `main` trig
 ---
 
 ## 🧪 Reproducible Testing (For Judges)
+We strongly encourage judges to experience the real-time multimodal AI support agent live!  
+No local setup required — test directly in the browser.
 
-We strongly encourage judges to test the live multimodal experience! 
+### Live Demo Links
+- **Agent Interface (No authentication needed)**: https://agent-google-cloud-366697832591.us-east5.run.app  
+  → Jump straight in to test voice + screen vision + real-time guidance (Google Cloud support focus).
+- **Admin Panel (Requires quick registration)**: https://supportpilot-admin-366697832591.us-east5.run.app  
+  → Register/login → Create a new agent → Get a shareable session link to test custom agents.
 
-### How to test:
-1. **Open the Live Demo**: Go to the provided Cloud Run URL in the links section above. (Please use Google Chrome for best voice/video compatibility).
-2. **Grant Permissions**: The browser will ask for Microphone and Screen Recording permissions. Both are strictly required. (For your privacy, we recommend sharing a specific browser tab or application window rather than your entire desktop).
-3. **Start the Session**: Click the "Connect" button. The agent will greet you with voice.
-4. **Test the Vision**:
-   - Open a complex webpage or SaaS application in the window you are sharing (e.g., GitHub, a Google Cloud console, or a Shopify admin panel).
-   - Say: *"Can you analyze my screen and tell me what page I'm on?"* 
-   - Observe how the agent accurately describes your UI.
-5. **Test the RAG / Search**:
-   - Say: *"Search the documentation for how to deploy a Next.js app on Vercel."* 
-   - The agent will use its `google_search` tool and answer you based on grounded documentation.
-6. **Test the Barge-in Mechanism**:
-   - Ask the agent a long question, like *"Explain the history of the internet."*
-   - While the agent is speaking, abruptly interrupt it: *"Wait, stop, tell me about the Python language instead."*
-   - Notice how the agent instantly halts its previous sentence and seamlessly pivots to your new question.
+Both are auto-deployed to Google Cloud Run (stable URLs — won't change on updates). Tested 100% functional as of March 13, 2026.
+
+### How to Test (5–10 Minutes)
+1. **Open in Google Chrome** (works in other modern browsers too).
+2. **Access the Agent Demo**:
+   - Visit: https://agent-google-cloud-366697832591.us-east5.run.app
+   - (Or from admin panel: create agent → copy session URL and open it.)
+3. **Grant Permissions**:
+   - Allow **Microphone** and **Screen Recording** when prompted.
+   - Privacy tip: Share only a specific tab/window (e.g., Google Cloud Console) instead of entire screen.
+4. **Start the Session**:
+   - Click **"Start Screen Share"** (or equivalent button).
+   - Agent greets you via voice — you're live!
+5. **Test Core Multimodal Features**:
+   - **Vision / Screen Awareness**:
+     - Share a complex SaaS page (e.g., Google Cloud Billing, IAM console, GitHub repo settings).
+     - Ask: *"What page am I looking at right now?"* or *"Analyze my screen — where is the 'Create budget alert' button?"*
+     - Expect accurate description + step-by-step pointers based on 1 fps passive capture.
+   - **Grounded RAG / Search**:
+     - Ask: *"How do I deploy a Next.js app to Vercel?"* or *"Search docs for setting up Cloud Run with custom domain."*
+     - Agent uses `google_search` tool → provides grounded, up-to-date answer with sources if needed.
+   - **Barge-in / Real-Time Interruption**:
+     - Start a long response: *"Explain the full history of the internet from ARPANET to now."*
+     - While agent is speaking, interrupt loudly: *"Stop — tell me about Python instead!"*
+     - Agent should halt immediately and pivot seamlessly (Gemini Live API native support).
+   - **Voice + Guidance Flow**:
+     - Say naturally: *"I'm stuck in the GCP console trying to enable billing export — walk me through it step by step."*
+     - Listen for voice responses + on-screen highlights/instructions.
+6. **Optional: Create Custom Agent (Admin Panel)**:
+   - Go to https://supportpilot-admin-366697832591.us-east5.run.app
+   - Register (email/password) → Click "Create Agent".
+   - Configure (e.g., name, key and instruction) → Save → Deploy → Open the generated session URL.
+   - Test same flows above with your custom setup.
+
+### Troubleshooting Tips
+- No audio? Check mic permissions + Chrome settings (chrome://settings/content/microphone).
+- Screen share fails? Ensure tab/window is active; retry permissions.
+- Latency? Normal for first connection (Gemini Live streaming); subsequent interactions are faster.
+- Issues? Fall back to local Docker Compose in README (quick setup with `docker compose up`).
+
+This live setup lets you fully experience the "see-hear-speak" immersion without any code/install. Thank you for testing — feedback welcome!
 
 ---
 
