@@ -128,21 +128,6 @@ All third-party tools are used in accordance with their respective licenses and 
 
 ## 🚀 Spin-Up Instructions
 
-### Prerequisites
-
-1. **Python 3.11+** and **Node.js 18+** (with `pnpm`)
-2. **Google Cloud CLI** (`gcloud`) — [Install Guide](https://cloud.google.com/sdk/docs/install)
-3. A GCP project with billing enabled
-4. Enable required APIs:
-   ```bash
-   gcloud services enable \
-     run.googleapis.com \
-     cloudbuild.googleapis.com \
-     firestore.googleapis.com \
-     aiplatform.googleapis.com
-   ```
-
----
 
 ### Option 1: Quick Local Run (Recommended for Local Dev)
 
@@ -171,6 +156,20 @@ Open your browser and visit: [http://localhost:8080/](http://localhost:8080/)
 ### Option 2: Deploy to Google Cloud
 
 Use the included deployment script to push everything to Cloud Run.
+
+#### Prerequisites for Deployment
+
+1. **Python 3.11+** and **Node.js 18+** (with `pnpm`)
+2. **Google Cloud CLI** (`gcloud`) — [Install Guide](https://cloud.google.com/sdk/docs/install)
+3. A GCP project with billing enabled
+4. Enable required APIs:
+   ```bash
+   gcloud services enable \
+     run.googleapis.com \
+     cloudbuild.googleapis.com \
+     firestore.googleapis.com \
+     aiplatform.googleapis.com
+   ```
 
 **Step 1 — Login and set your project:**
 
