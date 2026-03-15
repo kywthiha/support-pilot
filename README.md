@@ -27,6 +27,37 @@ Most support bots are turn-based text chatbots. SupportPilot breaks the "text bo
 
 ---
 
+## Visual Demo & Screenshots
+
+Here are key screenshots showing SupportPilot in action.
+
+<details open>
+<summary>1. Live support session (screen share + voice guidance)</summary>
+
+![Live session example](screenshots/live-session.png)
+
+The agent sees your screen, hears your question, and points to the exact button.
+
+</details>
+
+<details open>
+<summary>2. Admin dashboard – agent creation</summary>
+
+![Admin create agent](screenshots/admin-dashboard-create.png)
+
+Managers set persona, upload PDFs for RAG, pick voice, and deploy with one click.
+
+</details>
+
+<details open>
+<summary>3. Architecture overview</summary>
+
+![Architecture diagram](screenshots/architecture-diagram.png)
+
+Client streams to FastAPI → Gemini Live API via ADK → Vertex AI + Cloud Run.
+
+</details>
+
 ## 🎬 Links for Judges
 
 | Resource                 | Link                                                         |
@@ -48,52 +79,108 @@ SupportPilot is designed as a **multi-tenant SaaS platform** with two planes:
 - **Execution Plane (Agent)** — FastAPI + ADK server that handles live voice/vision sessions
 
 ```mermaid
-graph TD
+flowchart LR
     classDef client fill:#e0e7ff,stroke:#4f46e5,stroke-width:2px,color:#1e293b
     classDef server fill:#fce7f3,stroke:#db2777,stroke-width:2px,color:#1e293b
     classDef google fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#1e293b
     classDef adk fill:#f3f4f6,stroke:#4b5563,stroke-width:2px,color:#1e293b,stroke-dasharray: 5 5
     classDef admin fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#1e293b
+    classDef bonus fill:#fef08a,stroke:#ca8a04,stroke-width:2px,color:#1e293b,stroke-dasharray: 5 5
+
+    %% ── CI/CD Pipeline ──
+    subgraph CICD ["CI/CD Pipeline (GitHub Actions)"]
+        direction TB
+        GHA["GitHub Actions<br>(Push to main)"]:::bonus
+        CloudBuild["Google Cloud Build<br>(gcloud builds submit)"]:::bonus
+        GCR[("Google Container Registry<br>(Base Agent Image)")]:::google
+
+        GHA -->|"1. Triggers Build"| CloudBuild
+        CloudBuild -->|"2. Pushes Image"| GCR
+    end
 
     %% ── Control Plane ──
-    subgraph ControlPlane ["Control Plane — Django Admin (Cloud Run)"]
-        AdminUI["Django Admin Panel<br>(Agent CRUD, RAG Upload, Deploy)"]:::admin
-        Postgres[("PostgreSQL<br>(Users & Auth)")]:::admin
-        AdminUI <-->|"Auth & Data"| Postgres
+    subgraph ControlPlane ["Control Plane (Cloud Run)"]
+        direction TB
+        AdminUI["Django Admin Panel<br>(Deploy & Config)"]:::admin
     end
 
-    %% ── Customer Client ──
-    subgraph Client ["Customer Client (React + Vite)"]
-        UI["SupportPilot UI<br>(Mic + Screen Share + Chat)"]:::client
+    %% ── Frontend ──
+    subgraph Frontend ["Frontend (Client UI)"]
+        direction TB
+        UI["SupportPilot UI<br>(React/Vite)"]:::client
     end
 
-    %% ── Google Cloud Services ──
-    subgraph GCP_Data ["Google Cloud Platform"]
-        Firestore[("Firestore<br>(Agent Configs)")]:::google
-        VertexRAG[("Vertex AI RAG<br>(Knowledge Base)")]:::google
-        MemoryBank[("Vertex AI Memory Bank<br>(Session History)")]:::google
-        LiveAPI{{"Gemini Live API<br>(gemini-2.5-flash)"}}:::google
+    %% ── Backend ──
+    subgraph Backend ["Execution Plane (Cloud Run Agents)"]
+        direction TB
+        WS["WebSocket Endpoint<br>(FastAPI Proxy)"]:::server
+        LiveState["Live State Buffer<br>(Memory/Frames)"]:::server
+
+        subgraph ADK_Framework ["Google Agent Development Kit (ADK)"]
+            direction TB
+            Queue["LiveRequestQueue"]:::adk
+            Runner["ADK Runner<br>(Lifecycle Manager)"]:::adk
+            Agent["Agent Setup & Context"]:::adk
+
+            subgraph ToolBox ["Multimodal Agent Tools"]
+                direction TB
+                AnalyzeScreen["analyze_screen<br>(Visual UI Action)"]:::adk
+                GoogleSearch["google_search"]:::adk
+                KnowledgeBase["knowledge_base"]:::adk
+                SendCopyText["send_copy_text"]:::adk
+                PreloadMemory["PreloadMemoryTool"]:::adk
+            end
+        end
+
+        %% Internal Execution Flow
+        WS -->|"Updates Latest Frame"| LiveState
+        WS -->|"Pushes Audio/Text"| Queue
+        Queue <-->|"Streams IO"| Runner
+        Runner -->|"Loads"| Agent
+        Agent -->|"Executes"| ToolBox
+        AnalyzeScreen -.->|"Reads Latest Frame"| LiveState
+        Runner -->|"Yields Audio & Tool Events"| WS
     end
 
-    %% ── Execution Plane ──
-    subgraph ExecutionPlane ["Execution Plane — Agent Server (Cloud Run)"]
-        WS["FastAPI WebSocket Server"]:::server
-        ADK["ADK Runner + SupportPilot Agent"]:::adk
-        Tools["Tools: analyze_screen | google_search<br>knowledge_base | send_copy_text"]:::adk
-        WS <-->|"Bidi Audio + Video + Text"| ADK
-        ADK -.->|"Executes"| Tools
+    %% ── Databases & External APIs ──
+    subgraph GCP ["Google Cloud Databases & Models"]
+        direction TB
+        subgraph Databases ["Databases & Search"]
+            Firestore[("Cloud Firestore<br>(Agent Configs)")]:::google
+            VertexRAG[("Vertex AI RAG<br>(Knowledge Base)")]:::google
+            MemoryBank[("Vertex AI Memory<br>(Session Context)")]:::google
+        end
+
+        subgraph Gemini ["Gemini Foundation Models"]
+            LiveAPI{{"Gemini Live API<br>(gemini-live-audio)"}}:::google
+            GenAI{{"Gemini 3 Flash<br>(Multimodal Vision)"}}:::google
+        end
     end
 
-    %% ── Data Flow ──
-    AdminUI -->|"1. Save Config"| Firestore
-    AdminUI -->|"2. Deploy Agent<br>(Cloud Run API)"| ExecutionPlane
-    AdminUI -->|"3. Upload Docs"| VertexRAG
+    %% ── Connections ──
 
-    UI <-->|"wss:// (MediaChunks)"| WS
-    ADK <-->|"Interleaved Stream"| LiveAPI
-    ADK <-->|"Load/Save Memory"| MemoryBank
-    ADK -.->|"Init Config"| Firestore
-    Tools <-->|"Retrieves Docs"| VertexRAG
+    %% CI/CD to Control Plane Flow
+    GHA -->|"3. gcloud run deploy<br>(Sets BASE_AGENT_IMAGE)"| AdminUI
+    AdminUI -.->|"4. Pulls Base Image"| GCR
+    AdminUI -->|"5. Spawns Live Agents"| Backend
+
+    %% Control Plane to GCP Flow
+    AdminUI -->|"Saves Auth/Config"| Firestore
+    AdminUI -->|"Uploads RAG Docs"| VertexRAG
+
+    %% Client Flow
+    UI <-->|"wss:// (Bidi Audio, Video @ 1fps, Tool Responses)"| WS
+
+    %% Backend to GCP Flow
+    Runner <-->|"Native Audio Stream"| LiveAPI
+    Agent -.->|"Loads Config on Boot"| Firestore
+    WS -->|"Saves Session on Disconnect"| MemoryBank
+    PreloadMemory -.->|"Queries Session History"| MemoryBank
+
+    %% Tool to GCP Flow
+    AnalyzeScreen <-->|"Sends Frame → JSON Action"| GenAI
+    KnowledgeBase <-->|"Semantic Search"| VertexRAG
+    GoogleSearch -.->|"Grounded Web Search"| GCP
 ```
 
 > 👉 [See the detailed architecture breakdown](architecture.md)
