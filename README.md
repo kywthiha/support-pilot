@@ -358,7 +358,7 @@ Both are auto-deployed to Google Cloud Run (stable URLs — won't change on upda
      - Ask: _"What page am I looking at right now?"_ or _"Analyze my screen — where is the 'Create budget alert' button?"_
      - Expect accurate description + step-by-step pointers based on 1 fps passive capture.
    - **Grounded RAG / Search**:
-     - Ask: _"How do I deploy a Next.js app to Vercel?"_ or _"Search docs for setting up Cloud Run with custom domain."_
+     - Ask: _"How do I deploy a Python app to Google Cloud Run?"_ or _"Search docs for setting up Cloud Run with custom domain."_
      - Agent uses `google_search` tool → provides grounded, up-to-date answer with sources if needed.
    - **Barge-in / Real-Time Interruption**:
      - Start a long response: _"Explain the full history of the internet from ARPANET to now."_
