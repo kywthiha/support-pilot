@@ -63,7 +63,7 @@ Client streams to FastAPI → Gemini Live API via ADK → Vertex AI + Cloud Run.
 | Resource                 | Link                                                         |
 | ------------------------ | ------------------------------------------------------------ |
 | **Demo Video**           | [YouTube Link](https://youtu.be/UU9l0fM66oA)                 |
-| **GCP Deployment Proof** | [YouTube Link](https://youtu.be/sPj2fDGeI04)                 |
+| **GCP Deployment Proof** | [YouTube Link](https://youtu.be/Qk1mutMrOXA)                 |
 | **Architecture Diagram** | [architecture.md](architecture.md)                           |
 | **Admin Panel Guide**    | [ADMIN_PANEL_USER_GUIDE.md](admin/ADMIN_PANEL_USER_GUIDE.md) |
 | **RAG Guide**            | [RAG_USER_GUIDE.md](admin/RAG_USER_GUIDE.md)                 |
